@@ -62,10 +62,11 @@
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listView1 = new System.Windows.Forms.ListView();
-            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.pictureBox_gameicon = new System.Windows.Forms.PictureBox();
-            this.btnDownload = new System.Windows.Forms.Button();
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.btnDownload = new System.Windows.Forms.Button();
+            this.检查游戏更新ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pictureBox_gameicon = new System.Windows.Forms.PictureBox();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_gameicon)).BeginInit();
@@ -95,13 +96,14 @@
             // 
             // label_info
             // 
-            this.label_info.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
+            this.label_info.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label_info.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label_info.Location = new System.Drawing.Point(13, 573);
             this.label_info.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label_info.Name = "label_info";
-            this.label_info.Size = new System.Drawing.Size(759, 99);
+            this.label_info.Size = new System.Drawing.Size(806, 99);
             this.label_info.TabIndex = 8;
             this.label_info.Text = "简介";
             // 
@@ -121,7 +123,8 @@
             // 文件ToolStripMenuItem
             // 
             this.文件ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menu_update_game});
+            this.menu_update_game,
+            this.检查游戏更新ToolStripMenuItem});
             this.文件ToolStripMenuItem.Name = "文件ToolStripMenuItem";
             this.文件ToolStripMenuItem.Size = new System.Drawing.Size(51, 24);
             this.文件ToolStripMenuItem.Text = "文件";
@@ -129,7 +132,7 @@
             // menu_update_game
             // 
             this.menu_update_game.Name = "menu_update_game";
-            this.menu_update_game.Size = new System.Drawing.Size(159, 26);
+            this.menu_update_game.Size = new System.Drawing.Size(216, 26);
             this.menu_update_game.Text = "更新数据库";
             this.menu_update_game.Click += new System.EventHandler(this.menu_update_game_Click);
             // 
@@ -148,31 +151,31 @@
             // 查看帮助ToolStripMenuItem
             // 
             this.查看帮助ToolStripMenuItem.Name = "查看帮助ToolStripMenuItem";
-            this.查看帮助ToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
+            this.查看帮助ToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.查看帮助ToolStripMenuItem.Text = "查看帮助";
             this.查看帮助ToolStripMenuItem.Click += new System.EventHandler(this.查看帮助ToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(141, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(213, 6);
             // 
             // 发送反馈ToolStripMenuItem
             // 
             this.发送反馈ToolStripMenuItem.Name = "发送反馈ToolStripMenuItem";
-            this.发送反馈ToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
+            this.发送反馈ToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.发送反馈ToolStripMenuItem.Text = "发送反馈";
             this.发送反馈ToolStripMenuItem.Click += new System.EventHandler(this.发送反馈ToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(141, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(213, 6);
             // 
             // 关于ToolStripMenuItem
             // 
             this.关于ToolStripMenuItem.Name = "关于ToolStripMenuItem";
-            this.关于ToolStripMenuItem.Size = new System.Drawing.Size(144, 26);
+            this.关于ToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.关于ToolStripMenuItem.Text = "关于";
             this.关于ToolStripMenuItem.Click += new System.EventHandler(this.关于ToolStripMenuItem_Click);
             // 
@@ -235,6 +238,8 @@
             // 
             // label_count
             // 
+            this.label_count.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label_count.BackColor = System.Drawing.Color.Transparent;
             this.label_count.Font = new System.Drawing.Font("微软雅黑", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label_count.ForeColor = System.Drawing.Color.DimGray;
@@ -258,10 +263,12 @@
             // 
             // label_info_support_lan
             // 
+            this.label_info_support_lan.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label_info_support_lan.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label_info_support_lan.Location = new System.Drawing.Point(178, 521);
             this.label_info_support_lan.Name = "label_info_support_lan";
-            this.label_info_support_lan.Size = new System.Drawing.Size(594, 41);
+            this.label_info_support_lan.Size = new System.Drawing.Size(641, 41);
             this.label_info_support_lan.TabIndex = 108;
             this.label_info_support_lan.Text = "支持语言：";
             // 
@@ -371,6 +378,8 @@
             // 
             // listView1
             // 
+            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
@@ -395,10 +404,33 @@
             this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
             this.listView1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listView1_MouseDoubleClick);
             // 
+            // columnHeader8
+            // 
+            this.columnHeader8.Text = "发行商";
+            this.columnHeader8.Width = 110;
+            // 
             // columnHeader5
             // 
             this.columnHeader5.Text = "发行日期";
             this.columnHeader5.Width = 85;
+            // 
+            // btnDownload
+            // 
+            this.btnDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnDownload.Location = new System.Drawing.Point(699, 389);
+            this.btnDownload.Name = "btnDownload";
+            this.btnDownload.Size = new System.Drawing.Size(121, 23);
+            this.btnDownload.TabIndex = 116;
+            this.btnDownload.Text = "查看百度云";
+            this.btnDownload.UseVisualStyleBackColor = true;
+            this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
+            // 
+            // 检查游戏更新ToolStripMenuItem
+            // 
+            this.检查游戏更新ToolStripMenuItem.Name = "检查游戏更新ToolStripMenuItem";
+            this.检查游戏更新ToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.检查游戏更新ToolStripMenuItem.Text = "检查游戏更新";
+            this.检查游戏更新ToolStripMenuItem.Click += new System.EventHandler(this.检查游戏更新ToolStripMenuItem_Click);
             // 
             // pictureBox_gameicon
             // 
@@ -413,21 +445,6 @@
             this.pictureBox_gameicon.TabIndex = 7;
             this.pictureBox_gameicon.TabStop = false;
             this.pictureBox_gameicon.Click += new System.EventHandler(this.pictureBox_gameicon_Click);
-            // 
-            // btnDownload
-            // 
-            this.btnDownload.Location = new System.Drawing.Point(699, 389);
-            this.btnDownload.Name = "btnDownload";
-            this.btnDownload.Size = new System.Drawing.Size(121, 23);
-            this.btnDownload.TabIndex = 116;
-            this.btnDownload.Text = "查看百度云";
-            this.btnDownload.UseVisualStyleBackColor = true;
-            this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
-            // 
-            // columnHeader8
-            // 
-            this.columnHeader8.Text = "发行商";
-            this.columnHeader8.Width = 110;
             // 
             // Form1
             // 
@@ -507,6 +524,7 @@
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.Button btnDownload;
         private System.Windows.Forms.ColumnHeader columnHeader8;
+        private System.Windows.Forms.ToolStripMenuItem 检查游戏更新ToolStripMenuItem;
     }
 }
 

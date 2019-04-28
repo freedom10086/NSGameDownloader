@@ -22,12 +22,11 @@ namespace NSGameDownloader
     //todo 尝试进行从百度云直接得到真实下载地址 
     public partial class Form1 : Form
     {
-        private const string ConfigPath = "config.json";
-        private const string TitleKeysPath = "keys.json";
-        private const string CookiePath = "cookie.json";
-        private const string ExcelPath = "db.xlsx";
-        private const int EM_SETCUEBANNER = 0x1501;
-
+        private readonly string ConfigPath = "config.json";
+        private readonly string TitleKeysPath = "keys.json";
+        private readonly string CookiePath = "cookie.json";
+        private readonly int EM_SETCUEBANNER = 0x1501;
+        private readonly string ExcelPath = "db.xlsx";
         private string _curTid;
 
         // 只显示中文游戏
@@ -103,8 +102,7 @@ namespace NSGameDownloader
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            File.WriteAllText(TitleKeysPath, _titlekeys.ToString());
-
+            //File.WriteAllText(TitleKeysPath, _titlekeys.ToString());
             WriteCookieFile();
         }
 
@@ -124,11 +122,64 @@ namespace NSGameDownloader
             File.WriteAllText(CookiePath, JsonConvert.SerializeObject(_cookies));
         }
 
+        private string GetBaseTid(string id)
+        {
+            if (id.EndsWith("000")) {
+                return id;
+            }
+            else if (id.EndsWith("800"))
+            {
+                return id.Substring(0, id.Length - 3) + "000";
+            }
+            else
+            {
+                long val = long.Parse(id.Substring(0, id.Length - 3), System.Globalization.NumberStyles.HexNumber);
+                val = val - 1;
+
+                //Console.WriteLine("dlc:" + id + " base:" + val.ToString("X") + "000");
+
+                return val.ToString("X") + "000";
+            }
+
+        }
+
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern int SendMessage(IntPtr hWnd, int msg, int wParam,
             [MarshalAs(UnmanagedType.LPWStr)] string lParam);
-        
+
+
+        public void CheckGameUpdate()
+        {
+            Invoke(new Action(() =>
+            {
+                toolStripProgressBar_download.Visible = true;
+                toolStripProgressBar_download.Maximum = 5;
+                toolStripProgressBar_download.Value = 1;
+                button_search.Enabled = false;
+                checkbox_cn.Enabled = false;
+                check_box_download.Enabled = false;
+                textBox_keyword.Enabled = false;
+                btnDownload.Enabled = false;
+                label_progress.Visible = true;
+                label_progress.Text = "检查更新中...";
+            }));
+
+
+            // TODO
+            
+
+            Invoke(new Action(() =>
+            {
+                button_search.Enabled = true;
+                checkbox_cn.Enabled = true;
+                check_box_download.Enabled = true;
+                textBox_keyword.Enabled = true;
+                toolStripProgressBar_download.Visible = false;
+                label_progress.Visible = false;
+                SearchGameName();
+            }));
+        }
 
         public void UpdateTitleKey()
         {
@@ -144,51 +195,68 @@ namespace NSGameDownloader
                 textBox_keyword.Enabled = false;
                 btnDownload.Enabled = false;
                 label_progress.Visible = true;
-                label_progress.Text = "下载db.xlsx...";
             }));
 
 
-            _titlekeys = new JObject();
+            if (!File.Exists(ExcelPath))
+            {
+                Invoke(new Action(() =>
+                {
+                    toolStripProgressBar_download.Visible = false;
+                    label_progress.Visible = false;
 
+                    MessageBox.Show("无法访问db.xlsx,请将db.xlsx放在程序根目录", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }));
+                return;
+            }
+
+            _titlekeys = new JObject();
             try
             {
-                if (!DownloadExcel()) {
+                Invoke(new Action(() =>
+                {
+                    toolStripProgressBar_download.Value = 2;
+                    label_progress.Text = "更新nutdb...";
+                }));
+
+                //ReadNutDb();
+                if (!UpdateNutTileDb("US.en"))
+                {
                     Invoke(new Action(() =>
                     {
                         toolStripProgressBar_download.Visible = false;
                         label_progress.Visible = false;
+
+                        MessageBox.Show("更新nutdb出错", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }));
                     return;
                 }
 
+                if (!UpdateNutTileDb("JP.ja"))
+                {
+                    Console.WriteLine("更新日区失败...");
+                }
+
+                if (!UpdateNutTileDb("HK.zh"))
+                {
+                    Console.WriteLine("更新港区失败...");
+                }
+
                 Invoke(new Action(() =>
                 {
-                    toolStripProgressBar_download.Value = 2;
+                    toolStripProgressBar_download.Value = 4;
                     label_progress.Text = "解析db.xlsx...";
                 }));
 
                 ReadExcel();
-                Invoke(new Action(() =>
-                {
-                    toolStripProgressBar_download.Value = 3;
-                    label_progress.Text = "下载tiledb...";
-                }));
+                
+                File.WriteAllText(TitleKeysPath, _titlekeys.ToString());
 
-                //ReadNutDb();
-                if (!ReadNutTileDb("US.en")) {
-                    Invoke(new Action(() =>
-                    {
-                        toolStripProgressBar_download.Visible = false;
-                        label_progress.Visible = false;
-                    }));
-                    return;
-                }
                 Invoke(new Action(() =>
                 {
                     toolStripProgressBar_download.Value = 5;
+                    label_progress.Text = "更新完成";
                 }));
-
-                File.WriteAllText(TitleKeysPath, _titlekeys.ToString());
             }
             catch (Exception e)
             {
@@ -208,34 +276,99 @@ namespace NSGameDownloader
             }));
         }
 
-        private bool DownloadExcel()
+        // https://github.com/blawar/nut/tree/master/titledb
+        private bool UpdateNutTileDb(string region)
         {
+            var http = new WebClient { Encoding = Encoding.UTF8 };
+            ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            String htmlJson;
             try
             {
-
-                using (var http = new GZipWebClient())
-                {
-                    http.Headers.Add("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-                    http.Headers.Add("User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.110 Safari/537.36");
-                    http.Headers.Add("Accept-Encoding: gzip, deflate, br");
-                    http.Headers.Add("Upgrade-Insecure-Requests: 1");
-
-                    Console.WriteLine("start download excel ...");
-                    http.DownloadFile(_config["excelDbUrl"].ToString(), ExcelPath);
-                    Console.WriteLine("download excel success!");
-
-                    return true;
-                }
+                Console.WriteLine("start download " + region);
+                http.DownloadFile("https://raw.githubusercontent.com/blawar/nut/master/titledb/"+ region + ".json", region + ".json");
+                //htmlJson = http.DownloadString("https://raw.githubusercontent.com/blawar/nut/master/titledb/US.en.json");
+                Console.WriteLine("download nuttiledb success ...");
             }
-            catch (Exception e)
+            catch
             {
-                MessageBox.Show("无法访问github,无法更新最新网盘地址.请检查网络", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                if (File.Exists("ExcelPath")) {
-                    File.Delete("ExcelPath");
-                }
+                MessageBox.Show("无法访问加载tiledb.请检查网络", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
 
+
+            Invoke(new Action(() =>
+            {
+                toolStripProgressBar_download.Value = 3;
+                label_progress.Text = "解析tiledb...";
+            }));
+        
+            Dictionary<string, JObject> dics;
+            try
+            {
+                // read file into a string and deserialize JSON to a type
+                htmlJson = File.ReadAllText(region + ".json");
+                Console.WriteLine("start parse " + region + " nuttiledb ...");
+                dics = JsonConvert.DeserializeObject<Dictionary<string, JObject>>(htmlJson);
+                Console.WriteLine("parse nuttiledb success!");
+            }
+            catch
+            {
+                MessageBox.Show("tiledb解析错误", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+
+            foreach (KeyValuePair<string, JObject> kvp in dics) {
+                var tid = kvp.Value["id"];
+                if (tid == null) continue;
+                var tidStr = tid.ToString();
+                if (tidStr.Length != 16) continue;
+                var isDemo = kvp.Value["isDemo"] == null ? true : kvp.Value["isDemo"].ToObject<bool>();
+                if (isDemo) continue;
+
+                var isUpd = tidStr.EndsWith("800");
+                var isBase = tidStr.EndsWith("000");
+
+                if (isBase)
+                {
+                    if (!_titlekeys.ContainsKey(tidStr))
+                    {
+                        _titlekeys[tidStr] = new JObject { };
+                        _titlekeys[tidStr]["tid"] = tidStr;
+                        _titlekeys[tidStr]["iszh"] = kvp.Value["languages"] != null ? kvp.Value["languages"].Contains("zh") : false;
+                        _titlekeys[tidStr]["name"] = kvp.Value["name"];
+                        _titlekeys[tidStr]["cname"] = kvp.Value["name"];
+                        _titlekeys[tidStr]["allnames"] = kvp.Value["name"];
+                        _titlekeys[tidStr]["xci"] = false;
+                        _titlekeys[tidStr]["nsp"] = false;
+                        _titlekeys[tidStr]["dlc"] = false;
+                        _titlekeys[tidStr]["releaseDate"] = kvp.Value["releaseDate"];
+                        _titlekeys[tidStr]["iconUrl"] = kvp.Value["iconUrl"];
+                        _titlekeys[tidStr]["bannerUrl"] = kvp.Value["bannerUrl"];
+                        _titlekeys[tidStr]["intro"] = kvp.Value["intro"];
+                        _titlekeys[tidStr]["description"] = kvp.Value["description"];
+                        _titlekeys[tidStr]["languages"] = kvp.Value["languages"];
+                        _titlekeys[tidStr]["categorys"] = kvp.Value["category"];
+                        _titlekeys[tidStr]["size"] = kvp.Value["size"];
+                        _titlekeys[tidStr]["publisher"] = kvp.Value["publisher"];
+                        _titlekeys[tidStr]["region"] = kvp.Value["region"];
+                        _titlekeys[tidStr]["version"] = kvp.Value["version"];
+                    }
+                }
+                else
+                {
+
+                    // UPD OR DLC
+                    var baseTid = GetBaseTid(tidStr);
+                    //Console.WriteLine("dlc " + tidStr);
+                }
+                
+            }
+
+            Console.WriteLine("parse nuttiledb success! count:" + _titlekeys.Count);
+            return true;
         }
 
         private void ReadExcel()
@@ -274,102 +407,27 @@ namespace NSGameDownloader
                 var haveUpd = !row[5].ToString().StartsWith("v0");
                 var haveDlc = row[6].ToString() != "×";
 
-
-                var jtemp = new JObject
+                if (!_titlekeys.ContainsKey(tid))
                 {
-                    ["tid"] = tid,
-                    ["iszh"] = iszh,
-                    ["cname"] = cname,
-                    ["allnames"] = allnames,
-                    ["xci"] = haveXci,
-                    ["nsp"] = haveNsp,
-                    ["dlc"] = haveDlc || haveUpd,
-                    ["version"] = row[5].ToString(),
-                    ["region"] = cname.Contains("（美版）") ? "US" : (cname.Contains("（日版）") ? "JP" : "US"),
-                    ["releaseDate"] = "",
+                    _titlekeys[tid] = new JObject {};
+                }
 
-                };
-                _titlekeys[tid] = jtemp;
+                _titlekeys[tid]["tid"] = tid;
+                _titlekeys[tid]["iszh"] = iszh;
+                _titlekeys[tid]["cname"] = cname;
+                _titlekeys[tid]["allnames"] = allnames;
+                _titlekeys[tid]["xci"] = haveXci;
+                _titlekeys[tid]["nsp"] = haveNsp;
+                _titlekeys[tid]["dlc"] = haveDlc || haveUpd;
+                _titlekeys[tid]["version"] = row[5].ToString();
+                _titlekeys[tid]["region"] = cname.Contains("（美版）") ? "US" : (cname.Contains("（日版）") ? "JP" : "US");
+
             }
 
             Console.WriteLine("read excel success!");
             fs.Close();
         }
 
-        // https://github.com/blawar/nut/tree/master/titledb
-        private bool ReadNutTileDb(string region)
-        {
-            var http = new WebClient { Encoding = Encoding.UTF8 };
-            ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-            Console.WriteLine("start download nuttiledb ...");
-
-            String htmlJson;
-            try
-            {
-                htmlJson = http.DownloadString("https://raw.githubusercontent.com/blawar/nut/master/titledb/US.en.json");
-                Console.WriteLine("download nuttiledb success ...");
-            }
-            catch
-            {
-                MessageBox.Show("无法访问加载tiledb.请检查网络", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-
-
-            Invoke(new Action(() =>
-            {
-                toolStripProgressBar_download.Value = 4;
-                label_progress.Text = "解析tiledb...";
-            }));
-        
-            Dictionary<string, JObject> dics;
-            try
-            {
-                Console.WriteLine("start parse nuttiledb ...");
-                dics = JsonConvert.DeserializeObject<Dictionary<string, JObject>>(htmlJson);
-                Console.WriteLine("parse nuttiledb success!");
-            }
-            catch
-            {
-                MessageBox.Show("tiledb解析错误", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-
-            
-
-            foreach (KeyValuePair<string, JObject> kvp in dics) {
-              
-                var tid = kvp.Value["id"];
-                if (tid == null) continue;
-                var isDemo = kvp.Value["isDemo"] == null ? true : kvp.Value["isDemo"].ToObject<bool>();
-                if (isDemo) continue;
-
-                var tidStr = tid.ToString();
-                if (_titlekeys.ContainsKey(tid.ToString())) //只会得到本体
-                {
-                    _titlekeys[tidStr]["name"] = kvp.Value["name"];
-                    _titlekeys[tidStr]["releaseDate"] = kvp.Value["releaseDate"];
-                    _titlekeys[tidStr]["iconUrl"] = kvp.Value["iconUrl"];
-                    _titlekeys[tidStr]["bannerUrl"] = kvp.Value["bannerUrl"];
-                    _titlekeys[tidStr]["intro"] = kvp.Value["intro"];
-                    _titlekeys[tidStr]["description"] = kvp.Value["description"];
-                    _titlekeys[tidStr]["languages"] = kvp.Value["languages"];
-                    _titlekeys[tidStr]["categorys"] = kvp.Value["category"];
-                    _titlekeys[tidStr]["size"] = kvp.Value["size"];
-                    _titlekeys[tidStr]["publisher"] = kvp.Value["publisher"];
-                    _titlekeys[tidStr]["region"] = kvp.Value["region"];
-                    _titlekeys[tidStr]["version"] = kvp.Value["version"];
-                }
-            }
-
-            Console.WriteLine("parse nuttiledb success! count:" + _titlekeys.Count);
-
-            return true;
-        }
-
-        
         private void button_search_Click(object sender, EventArgs e)
         {
             //var keys = Titlekeys.Root.Where(x => x.Contains(textBox_keyword.Text.Trim()));
@@ -478,7 +536,6 @@ namespace NSGameDownloader
                 }
             }));
         }
-
 
         private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -722,7 +779,8 @@ namespace NSGameDownloader
 
         private void 关于ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start("https://github.com/freedom10086/NSGameDownloader");
+            AboutBox1 form = new AboutBox1();
+            form.Show();
         }
 
         private void localDirLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -768,6 +826,18 @@ namespace NSGameDownloader
             Form2 form2 = new Form2(_curTid, info_label_name.Text, _cookies, _config);
             form2.Text = info_label_name.Text;
             form2.Show();
+        }
+
+        private void 检查游戏更新ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (_config["localGameDir"].ToString().Length > 0 && Directory.Exists(_config["localGameDir"].ToString())) {
+                MessageBox.Show("请先设定本地游戏存储目录，配置文件config.json的配置项[localGameDir]", "提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            var t = new Thread(CheckGameUpdate);
+            t.Start();
+
         }
     }
 }
