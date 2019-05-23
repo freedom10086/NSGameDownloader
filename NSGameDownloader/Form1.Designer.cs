@@ -35,6 +35,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menu_update_game = new System.Windows.Forms.ToolStripMenuItem();
+            this.检查游戏更新ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.帮助ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.查看帮助ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -57,16 +58,14 @@
             this.check_box_download = new System.Windows.Forms.CheckBox();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listView1 = new System.Windows.Forms.ListView();
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.btnDownload = new System.Windows.Forms.Button();
-            this.检查游戏更新ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pictureBox_gameicon = new System.Windows.Forms.PictureBox();
+            this.localFileListbox = new System.Windows.Forms.ListBox();
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox_gameicon)).BeginInit();
@@ -126,15 +125,22 @@
             this.menu_update_game,
             this.检查游戏更新ToolStripMenuItem});
             this.文件ToolStripMenuItem.Name = "文件ToolStripMenuItem";
-            this.文件ToolStripMenuItem.Size = new System.Drawing.Size(51, 24);
+            this.文件ToolStripMenuItem.Size = new System.Drawing.Size(53, 24);
             this.文件ToolStripMenuItem.Text = "文件";
             // 
             // menu_update_game
             // 
             this.menu_update_game.Name = "menu_update_game";
-            this.menu_update_game.Size = new System.Drawing.Size(216, 26);
+            this.menu_update_game.Size = new System.Drawing.Size(182, 26);
             this.menu_update_game.Text = "更新数据库";
             this.menu_update_game.Click += new System.EventHandler(this.menu_update_game_Click);
+            // 
+            // 检查游戏更新ToolStripMenuItem
+            // 
+            this.检查游戏更新ToolStripMenuItem.Name = "检查游戏更新ToolStripMenuItem";
+            this.检查游戏更新ToolStripMenuItem.Size = new System.Drawing.Size(182, 26);
+            this.检查游戏更新ToolStripMenuItem.Text = "检查游戏更新";
+            this.检查游戏更新ToolStripMenuItem.Click += new System.EventHandler(this.检查游戏更新ToolStripMenuItem_Click);
             // 
             // 帮助ToolStripMenuItem
             // 
@@ -145,37 +151,37 @@
             this.toolStripMenuItem1,
             this.关于ToolStripMenuItem});
             this.帮助ToolStripMenuItem.Name = "帮助ToolStripMenuItem";
-            this.帮助ToolStripMenuItem.Size = new System.Drawing.Size(51, 24);
+            this.帮助ToolStripMenuItem.Size = new System.Drawing.Size(53, 24);
             this.帮助ToolStripMenuItem.Text = "帮助";
             // 
             // 查看帮助ToolStripMenuItem
             // 
             this.查看帮助ToolStripMenuItem.Name = "查看帮助ToolStripMenuItem";
-            this.查看帮助ToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.查看帮助ToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
             this.查看帮助ToolStripMenuItem.Text = "查看帮助";
             this.查看帮助ToolStripMenuItem.Click += new System.EventHandler(this.查看帮助ToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(213, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // 发送反馈ToolStripMenuItem
             // 
             this.发送反馈ToolStripMenuItem.Name = "发送反馈ToolStripMenuItem";
-            this.发送反馈ToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.发送反馈ToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
             this.发送反馈ToolStripMenuItem.Text = "发送反馈";
             this.发送反馈ToolStripMenuItem.Click += new System.EventHandler(this.发送反馈ToolStripMenuItem_Click);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(213, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
             // 
             // 关于ToolStripMenuItem
             // 
             this.关于ToolStripMenuItem.Name = "关于ToolStripMenuItem";
-            this.关于ToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
+            this.关于ToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
             this.关于ToolStripMenuItem.Text = "关于";
             this.关于ToolStripMenuItem.Click += new System.EventHandler(this.关于ToolStripMenuItem_Click);
             // 
@@ -187,10 +193,10 @@
             this.label_progress,
             this.toolStripStatusLabel1,
             this.toolStripStatusLabel2});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 676);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 675);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Padding = new System.Windows.Forms.Padding(1, 0, 19, 0);
-            this.statusStrip1.Size = new System.Drawing.Size(832, 25);
+            this.statusStrip1.Size = new System.Drawing.Size(832, 26);
             this.statusStrip1.TabIndex = 101;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -350,31 +356,19 @@
             // columnHeader2
             // 
             this.columnHeader2.Text = "NAME";
-            this.columnHeader2.Width = 250;
-            // 
-            // columnHeader3
-            // 
-            this.columnHeader3.Text = "NSP";
-            this.columnHeader3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeader3.Width = 44;
-            // 
-            // columnHeader4
-            // 
-            this.columnHeader4.Text = "XCI";
-            this.columnHeader4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeader4.Width = 44;
+            this.columnHeader2.Width = 281;
             // 
             // columnHeader6
             // 
             this.columnHeader6.Text = "UPD/DLC";
             this.columnHeader6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeader6.Width = 44;
+            this.columnHeader6.Width = 81;
             // 
             // columnHeader7
             // 
             this.columnHeader7.Text = "中文";
             this.columnHeader7.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeader7.Width = 44;
+            this.columnHeader7.Width = 49;
             // 
             // listView1
             // 
@@ -383,8 +377,6 @@
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
-            this.columnHeader3,
-            this.columnHeader4,
             this.columnHeader6,
             this.columnHeader7,
             this.columnHeader8,
@@ -412,25 +404,18 @@
             // columnHeader5
             // 
             this.columnHeader5.Text = "发行日期";
-            this.columnHeader5.Width = 85;
+            this.columnHeader5.Width = 96;
             // 
             // btnDownload
             // 
             this.btnDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnDownload.Location = new System.Drawing.Point(699, 389);
+            this.btnDownload.Location = new System.Drawing.Point(698, 35);
             this.btnDownload.Name = "btnDownload";
-            this.btnDownload.Size = new System.Drawing.Size(121, 23);
+            this.btnDownload.Size = new System.Drawing.Size(121, 27);
             this.btnDownload.TabIndex = 116;
             this.btnDownload.Text = "查看百度云";
             this.btnDownload.UseVisualStyleBackColor = true;
             this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
-            // 
-            // 检查游戏更新ToolStripMenuItem
-            // 
-            this.检查游戏更新ToolStripMenuItem.Name = "检查游戏更新ToolStripMenuItem";
-            this.检查游戏更新ToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
-            this.检查游戏更新ToolStripMenuItem.Text = "检查游戏更新";
-            this.检查游戏更新ToolStripMenuItem.Click += new System.EventHandler(this.检查游戏更新ToolStripMenuItem_Click);
             // 
             // pictureBox_gameicon
             // 
@@ -446,11 +431,24 @@
             this.pictureBox_gameicon.TabStop = false;
             this.pictureBox_gameicon.Click += new System.EventHandler(this.pictureBox_gameicon_Click);
             // 
+            // localFileListbox
+            // 
+            this.localFileListbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.localFileListbox.FormattingEnabled = true;
+            this.localFileListbox.ItemHeight = 15;
+            this.localFileListbox.Location = new System.Drawing.Point(545, 389);
+            this.localFileListbox.Name = "localFileListbox";
+            this.localFileListbox.Size = new System.Drawing.Size(274, 64);
+            this.localFileListbox.TabIndex = 117;
+            this.localFileListbox.Visible = false;
+            this.localFileListbox.SelectedIndexChanged += new System.EventHandler(this.LocalFileListbox_SelectedIndexChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(832, 701);
+            this.Controls.Add(this.localFileListbox);
             this.Controls.Add(this.btnDownload);
             this.Controls.Add(this.check_box_download);
             this.Controls.Add(this.info_label_publisher);
@@ -515,8 +513,6 @@
         private System.Windows.Forms.CheckBox check_box_download;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
-        private System.Windows.Forms.ColumnHeader columnHeader3;
-        private System.Windows.Forms.ColumnHeader columnHeader4;
         private System.Windows.Forms.ColumnHeader columnHeader6;
         private System.Windows.Forms.ColumnHeader columnHeader7;
         private System.Windows.Forms.ListView listView1;
@@ -525,6 +521,7 @@
         private System.Windows.Forms.Button btnDownload;
         private System.Windows.Forms.ColumnHeader columnHeader8;
         private System.Windows.Forms.ToolStripMenuItem 检查游戏更新ToolStripMenuItem;
+        private System.Windows.Forms.ListBox localFileListbox;
     }
 }
 

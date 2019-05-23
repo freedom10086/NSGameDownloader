@@ -163,6 +163,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\main.ico" />
+    <Content Include="XCI-Explorer\keys.txt" />
+    <Content Include="XCI-Explorer\tools\hactool.exe" />
+    <Content Include="XCI-Explorer\XCI-Explorer.exe" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="SHDocVw">
@@ -190,6 +193,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy "$(ProjectDir)\config.json" "$(ProjectDir)$(OutDir)config.json"
-copy "$(ProjectDir)\cookie.json" "$(ProjectDir)$(OutDir)cookie.json"</PostBuildEvent>
+copy "$(ProjectDir)\cookie.json" "$(ProjectDir)$(OutDir)cookie.json"
+copy "$(ProjectDir)\XCI-Explorer" "$(ProjectDir)$(OutDir)\XCI-Explorer"</PostBuildEvent>
   </PropertyGroup>
 </Project>

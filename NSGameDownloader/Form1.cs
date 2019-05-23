@@ -43,6 +43,7 @@ namespace NSGameDownloader
         private JObject _titlekeys;
         private DataSet TitleDataSet;
         private GameListViewItemComparer listSorter;
+        private List<String> localGames = new List<String>();
 
         public Form1()
         {
@@ -57,16 +58,19 @@ namespace NSGameDownloader
             if (File.Exists(ConfigPath))
             {
                 _config = JObject.Parse(File.ReadAllText(ConfigPath));
-            } else {
+            }
+            else
+            {
                 MessageBox.Show("无法访问config.json配置文件", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            if (_config["localGameDir"].ToString().Length > 0 && Directory.Exists(_config["localGameDir"].ToString())) {
+            if (_config["localGameDir"].ToString().Length > 0 && Directory.Exists(_config["localGameDir"].ToString()))
+            {
                 check_box_download.Visible = true;
             }
 
-           
+
             listSorter = new GameListViewItemComparer();
 
             var tl = new Thread(ThreadLoad);
@@ -81,6 +85,8 @@ namespace NSGameDownloader
 
             ReadCookieFile();
 
+            LoadLocalGames();
+
             if (!File.Exists(TitleKeysPath))
             {
                 var t = new Thread(UpdateTitleKey);
@@ -93,7 +99,8 @@ namespace NSGameDownloader
 
             if (!Directory.Exists("image")) Directory.CreateDirectory("image");
             //使用winapi 做占位符
-            Invoke(new Action(() => {
+            Invoke(new Action(() =>
+            {
                 SendMessage(textBox_keyword.Handle, EM_SETCUEBANNER, 0, "在这里输入 id,中文名,英文名 关键字...");
             }));
 
@@ -124,7 +131,8 @@ namespace NSGameDownloader
 
         private string GetBaseTid(string id)
         {
-            if (id.EndsWith("000")) {
+            if (id.EndsWith("000"))
+            {
                 return id;
             }
             else if (id.EndsWith("800"))
@@ -140,7 +148,37 @@ namespace NSGameDownloader
 
                 return val.ToString("X") + "000";
             }
+        }
 
+        private void LoadLocalGames() {
+            try
+            {
+                Console.WriteLine("load local games ......");
+                DirectoryInfo dir = new DirectoryInfo(_config["localGameDir"].ToString());
+                DirectoryInfo[] directories = dir.GetDirectories();
+                foreach (DirectoryInfo d in directories)
+                {
+                    if (d.Name.Length == 5 && d.Name.StartsWith("01"))
+                    {
+                        DirectoryInfo[] subDirectories = d.GetDirectories();
+                        foreach (DirectoryInfo subD in subDirectories)
+                        {
+                            //01009A700A538000
+                            if (subD.Name.Length == 16)
+                            {
+                                localGames.Add(subD.Name);
+                            }
+                        }
+                    }
+                }
+
+                Console.WriteLine("load local games count:" + localGames.Count);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("load local games error:" + e);
+                return;
+            }
         }
 
 
@@ -167,7 +205,7 @@ namespace NSGameDownloader
 
 
             // TODO
-            
+
 
             Invoke(new Action(() =>
             {
@@ -249,7 +287,7 @@ namespace NSGameDownloader
                 }));
 
                 ReadExcel();
-                
+
                 File.WriteAllText(TitleKeysPath, _titlekeys.ToString());
 
                 Invoke(new Action(() =>
@@ -286,8 +324,9 @@ namespace NSGameDownloader
             String htmlJson;
             try
             {
-                Console.WriteLine("start download " + region);
-                http.DownloadFile("https://raw.githubusercontent.com/blawar/nut/master/titledb/"+ region + ".json", region + ".json");
+                String url = "https://raw.githubusercontent.com/blawar/nut/master/titledb/" + region + ".json";
+                Console.WriteLine("start download " + url);
+                http.DownloadFile(url, region + ".json");
                 //htmlJson = http.DownloadString("https://raw.githubusercontent.com/blawar/nut/master/titledb/US.en.json");
                 Console.WriteLine("download nuttiledb success ...");
             }
@@ -303,7 +342,7 @@ namespace NSGameDownloader
                 toolStripProgressBar_download.Value = 3;
                 label_progress.Text = "解析tiledb...";
             }));
-        
+
             Dictionary<string, JObject> dics;
             try
             {
@@ -320,7 +359,8 @@ namespace NSGameDownloader
             }
 
 
-            foreach (KeyValuePair<string, JObject> kvp in dics) {
+            foreach (KeyValuePair<string, JObject> kvp in dics)
+            {
                 var tid = kvp.Value["id"];
                 if (tid == null) continue;
                 var tidStr = tid.ToString();
@@ -337,12 +377,10 @@ namespace NSGameDownloader
                     {
                         _titlekeys[tidStr] = new JObject { };
                         _titlekeys[tidStr]["tid"] = tidStr;
-                        _titlekeys[tidStr]["iszh"] = kvp.Value["languages"] != null ? kvp.Value["languages"].Contains("zh") : false;
+                        _titlekeys[tidStr]["iszh"] = kvp.Value["languages"] != null ? kvp.Value["languages"].ToString().Contains("zh") : false;
                         _titlekeys[tidStr]["name"] = kvp.Value["name"];
                         _titlekeys[tidStr]["cname"] = kvp.Value["name"];
                         _titlekeys[tidStr]["allnames"] = kvp.Value["name"];
-                        _titlekeys[tidStr]["xci"] = false;
-                        _titlekeys[tidStr]["nsp"] = false;
                         _titlekeys[tidStr]["dlc"] = false;
                         _titlekeys[tidStr]["releaseDate"] = kvp.Value["releaseDate"];
                         _titlekeys[tidStr]["iconUrl"] = kvp.Value["iconUrl"];
@@ -364,7 +402,7 @@ namespace NSGameDownloader
                     var baseTid = GetBaseTid(tidStr);
                     //Console.WriteLine("dlc " + tidStr);
                 }
-                
+
             }
 
             Console.WriteLine("parse nuttiledb success! count:" + _titlekeys.Count);
@@ -402,22 +440,18 @@ namespace NSGameDownloader
                 var iszh = row[1].ToString() != "×";
                 var cname = row[2].ToString();
                 var allnames = row[3].ToString();
-                var haveXci = row[4].ToString().Contains("XCI");
-                var haveNsp = row[4].ToString().Contains("NSP");
                 var haveUpd = !row[5].ToString().StartsWith("v0");
                 var haveDlc = row[6].ToString() != "×";
 
                 if (!_titlekeys.ContainsKey(tid))
                 {
-                    _titlekeys[tid] = new JObject {};
+                    _titlekeys[tid] = new JObject { };
                 }
 
                 _titlekeys[tid]["tid"] = tid;
                 _titlekeys[tid]["iszh"] = iszh;
                 _titlekeys[tid]["cname"] = cname;
                 _titlekeys[tid]["allnames"] = allnames;
-                _titlekeys[tid]["xci"] = haveXci;
-                _titlekeys[tid]["nsp"] = haveNsp;
                 _titlekeys[tid]["dlc"] = haveDlc || haveUpd;
                 _titlekeys[tid]["version"] = row[5].ToString();
                 _titlekeys[tid]["region"] = cname.Contains("（美版）") ? "US" : (cname.Contains("（日版）") ? "JP" : "US");
@@ -437,82 +471,98 @@ namespace NSGameDownloader
 
         private void SearchGameName(string keywords = "")
         {
-            List<String> localGames = new List<String>();
             if (!_showDownloaded)
             {
                 if (_titlekeys == null) return;
                 if (_titlekeys.Count == 0) return;
-            }
-            else
-            {
-                try
-                {
-                    DirectoryInfo dir = new DirectoryInfo(_config["localGameDir"].ToString());
-                    DirectoryInfo[] directories = dir.GetDirectories();
-                    foreach (DirectoryInfo d in directories) {
-                        if (d.Name.Length == 5 && d.Name.StartsWith("01")) {
-                            DirectoryInfo[] subDirectories = d.GetDirectories();
-                            foreach (DirectoryInfo subD in subDirectories)
-                            {
-                                //01009A700A538000
-                                if (subD.Name.Length == 16)
-                                {
-                                    localGames.Add(subD.Name);
-                                }
-                            }
-                        }
-                    }
-
-                    Console.WriteLine("load local games count:" + localGames.Count);
-                }
-                catch(Exception e)
-                {
-                    Console.WriteLine("load local games error:" + e);
-                    return;
-                }
             }
             
 
             Invoke(new Action(() =>
             {
                 listView1.Items.Clear();
-                foreach (var titlekey in _titlekeys)
+
+                if (_showDownloaded) // 搜索本地已下载
                 {
-                    //全文件查找
-                    var allstr = titlekey.Value["tid"].ToString()
-                    + "#" + titlekey.Value["cname"]
-                    + (titlekey.Value["name"] != null ? ("#" + titlekey.Value["name"].ToString()) : "");
+                    foreach (var tid in localGames)
+                    {
+                        var titlekey = _titlekeys[tid];
+                        //全文件查找
+                        string allstr = tid;
+                        if (titlekey != null)
+                        {
+                            allstr = allstr + "#" + titlekey["cname"] + (titlekey["name"] != null ? ("#" + titlekey["name"].ToString()) : "");
+                        }
 
-                    if (_onlyShowCn && !titlekey.Value["iszh"].ToObject<bool>()) {
-                        continue;
-                    }
-
-                    if (allstr.ToLower().Contains(keywords.Trim().ToLower())) {
-                        if (_showDownloaded && !localGames.Contains(titlekey.Value["tid"].ToString()))
+                        if (_onlyShowCn && (titlekey != null && !titlekey["iszh"].ToObject<bool>()))
                         {
                             continue;
                         }
 
-                        listView1.Items.Add(new ListViewItem(new[]
+                        if (allstr.ToLower().Contains(keywords.Trim().ToLower()))
                         {
+                            if (titlekey == null)
+                            {
+                                listView1.Items.Add(new ListViewItem(new[]
+                                {
+                                tid,tid,"","","",""
+                                }));
+                            }
+                            else
+                            {
+                                listView1.Items.Add(new ListViewItem(new[]
+                                {
+                                titlekey["tid"].ToString(),
+                                titlekey["cname"].ToString().Trim() != "" ? titlekey["cname"].ToString().Trim() : (titlekey["name"] != null ? titlekey["name"].ToString() : titlekey["allnames"].ToString()), //防止没有中文名
+                                titlekey["dlc"].ToObject<bool>() ? "●" : "",
+                                titlekey["iszh"].ToObject<bool>() ? "●" : "",
+                                titlekey["publisher"]!= null ? titlekey["publisher"].ToString() : "",
+                                titlekey["releaseDate"]!= null ? titlekey["releaseDate"].ToString() : ""
+                                }));
+                            }
+
+                        }
+
+                    }
+                }
+                else
+                {
+                    foreach (var titlekey in _titlekeys)
+                    {
+                        //全文件查找
+                        var allstr = titlekey.Value["tid"].ToString()
+                        + "#" + titlekey.Value["cname"]
+                        + (titlekey.Value["name"] != null ? ("#" + titlekey.Value["name"].ToString()) : "");
+
+                        if (_onlyShowCn && !titlekey.Value["iszh"].ToObject<bool>())
+                        {
+                            continue;
+                        }
+
+                        if (allstr.ToLower().Contains(keywords.Trim().ToLower()))
+                        {
+                            listView1.Items.Add(new ListViewItem(new[]
+                            {
                             titlekey.Value["tid"].ToString(),
                             titlekey.Value["cname"].ToString().Trim() != "" ? titlekey.Value["cname"].ToString().Trim() : (titlekey.Value["name"] != null ? titlekey.Value["name"].ToString() : titlekey.Value["allnames"].ToString()), //防止没有中文名
-                            titlekey.Value["nsp"].ToObject<bool>() ? "●" : "",
-                            titlekey.Value["xci"].ToObject<bool>() ? "●" : "",
                             titlekey.Value["dlc"].ToObject<bool>() ? "●" : "",
                             titlekey.Value["iszh"].ToObject<bool>() ? "●" : "",
                             titlekey.Value["publisher"]!= null ? titlekey.Value["publisher"].ToString() : "",
                             titlekey.Value["releaseDate"]!= null ? titlekey.Value["releaseDate"].ToString() : ""
                         }));
+                        }
+
                     }
-                        
                 }
+
+
 
                 label_count.Text = "总数：" + listView1.Items.Count;
 
                 // 补全主动搜索
                 // 01006C900CC60000
-                if (listView1.Items.Count == 0 && keywords.Length == 16 && (keywords.EndsWith("000")|| keywords.EndsWith("800"))) {
+                if (listView1.Items.Count == 0 && keywords.Length == 16 && (keywords.EndsWith("000") || keywords.EndsWith("800")))
+                {
                     // change update to base
                     String newKeyword = keywords.Substring(0, 13) + "000";
                     listView1.Items.Add(new ListViewItem(new[]
@@ -550,25 +600,31 @@ namespace NSGameDownloader
             }
 
             _curTid = listView1.SelectedItems[0].Text;
-            if (_config["localGameDir"].ToString().Length > 0) {
+            if (_config["localGameDir"].ToString().Length > 0)
+            {
                 localDirLabel.Visible = true;
                 var dir = _config["localGameDir"].ToString() + "\\" + _curTid.Substring(0, 5) + "\\" + _curTid + "\\";
                 if (Directory.Exists(dir))
                 {
                     localDirLabel.Text = dir;
+                    localFileListbox.Visible = false;
+
+                    InitLocalListbox(dir);
                 }
                 else
                 {
                     localDirLabel.Text = "创建目录";
+                    localFileListbox.Visible = false;
                 }
             }
 
-         
+
             //刷新来自eshop的信息
             //var t = new Thread(GetGameInfoFromEShop);
             //t.Start();
 
-            if (!_titlekeys.ContainsKey(_curTid)) {
+            if (!_titlekeys.ContainsKey(_curTid))
+            {
                 info_label_name.Text = _curTid;
                 info_label_publisher.Text = "发行商：--";
                 label_info_size.Text = $"大小：--";
@@ -582,10 +638,11 @@ namespace NSGameDownloader
 
             info_label_name.Text = _titlekeys[_curTid]["cname"].ToString().Trim() != "" ? _titlekeys[_curTid]["cname"].ToString().Trim() : (_titlekeys[_curTid]["name"] != null ? _titlekeys[_curTid]["name"].ToString() : _titlekeys[_curTid]["allnames"].ToString());
             info_label_publisher.Text = "发行商：" + (_titlekeys[_curTid]["publisher"] != null ? _titlekeys[_curTid]["publisher"].ToString() : "");
-            label_info_size.Text = $"大小：{ConvertBytes(_titlekeys[_curTid]["size"] !=null ? _titlekeys[_curTid]["size"].ToObject<long>() : 0)}";
-            
+            label_info_size.Text = $"大小：{ConvertBytes(_titlekeys[_curTid]["size"] != null ? _titlekeys[_curTid]["size"].ToObject<long>() : 0)}";
+
             var lan_str = "";
-            if (_titlekeys[_curTid]["languages"] != null) {
+            if (_titlekeys[_curTid]["languages"] != null)
+            {
                 var lans = _titlekeys[_curTid]["languages"].ToArray();
                 foreach (var lan in lans)
                 {
@@ -599,7 +656,8 @@ namespace NSGameDownloader
 
 
             var categorys_str = "";
-            if (_titlekeys[_curTid]["categorys"] != null) {
+            if (_titlekeys[_curTid]["categorys"] != null)
+            {
                 var categorys = _titlekeys[_curTid]["categorys"].ToArray();
                 foreach (var cat in categorys)
                 {
@@ -607,16 +665,17 @@ namespace NSGameDownloader
                     categorys_str += " ";
                 }
             }
-            
+
             label_info_type.Text = "类型：" + categorys_str;
 
-            label_info.Text = $"{(_titlekeys[_curTid]!= null ? _titlekeys[_curTid]["description"] : "")}";
+            label_info.Text = $"{(_titlekeys[_curTid] != null ? _titlekeys[_curTid]["description"] : "")}";
 
             if (_titlekeys[_curTid]["iconUrl"] != null)
             {
                 var bannerUrl = _titlekeys[_curTid]["bannerUrl"];
                 var bannerUrlStr = "";
-                if (bannerUrl != null) {
+                if (bannerUrl != null)
+                {
                     bannerUrlStr = bannerUrl.ToString();
                 }
                 GetGameImage(_curTid, _titlekeys[_curTid]["iconUrl"].ToString(), bannerUrlStr);
@@ -624,6 +683,26 @@ namespace NSGameDownloader
             else
             {
                 pictureBox_gameicon.Image = Resources.error;
+            }
+        }
+
+        private void InitLocalListbox(string d)
+        {
+            DirectoryInfo dir = new DirectoryInfo(d);
+            if (!dir.Exists) { return; }
+            FileInfo[] files = dir.GetFiles();
+            localFileListbox.Items.Clear();
+
+            foreach (FileInfo f in files)
+            {
+                if (f.Name.EndsWith(".nsp") || f.Name.EndsWith(".xci")) {
+                    localFileListbox.Items.Add(f);
+                }
+            }
+
+            if (localFileListbox.Items.Count > 0)
+            {
+                localFileListbox.Visible = true;
             }
         }
 
@@ -676,7 +755,8 @@ namespace NSGameDownloader
         private void GetGameImage(String tid, String url, String bannerUrl)
         {
             var filename = "image\\" + tid + ".jpg";
-            if (File.Exists(filename)) {
+            if (File.Exists(filename))
+            {
                 try
                 {
                     pictureBox_gameicon.Image = Image.FromFile(filename);
@@ -687,7 +767,8 @@ namespace NSGameDownloader
                 }
             }
 
-            if (!File.Exists(filename)) {
+            if (!File.Exists(filename))
+            {
                 var web = new WebClient { Encoding = Encoding.UTF8 };
                 // 解决WebClient不能通过https下载内容问题
                 ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
@@ -697,13 +778,15 @@ namespace NSGameDownloader
                     web.DownloadFileCompleted += Icon_DownloadFileCompleted;
                     web.DownloadFileAsync(new Uri(url), filename, tid);
                     //web.DownloadFile(url, filename);
-                    Invoke(new Action(() => {
+                    Invoke(new Action(() =>
+                    {
                         pictureBox_gameicon.Image = Resources.load;
                     }));
                 }
                 catch
                 {
-                    Invoke(new Action(() => {
+                    Invoke(new Action(() =>
+                    {
                         if (tid == _curTid)
                             pictureBox_gameicon.Image = Resources.error;
                     }));
@@ -814,7 +897,8 @@ namespace NSGameDownloader
             if (_curTid == null) return;
             var g = _titlekeys[_curTid].ToObject<JObject>();
             var region = g["region"];
-            if (region == null || region.ToString().Equals("US") || region.ToString() == "") {
+            if (region == null || region.ToString().Equals("US") || region.ToString() == "")
+            {
                 region = "AU";
             }
 
@@ -830,7 +914,8 @@ namespace NSGameDownloader
 
         private void 检查游戏更新ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (_config["localGameDir"].ToString().Length > 0 && Directory.Exists(_config["localGameDir"].ToString())) {
+            if (_config["localGameDir"].ToString().Length > 0 && Directory.Exists(_config["localGameDir"].ToString()))
+            {
                 MessageBox.Show("请先设定本地游戏存储目录，配置文件config.json的配置项[localGameDir]", "提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -838,6 +923,15 @@ namespace NSGameDownloader
             var t = new Thread(CheckGameUpdate);
             t.Start();
 
+        }
+
+        private void LocalFileListbox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FileInfo f = (FileInfo)localFileListbox.SelectedItem;
+            Console.WriteLine(f.FullName);
+            ProcessStartInfo info = new ProcessStartInfo("XCI-Explorer\\XCI-Explorer.exe", "\"" + f.FullName + "\"");
+            //info.WorkingDirectory = Path.GetDirectoryName("");
+            Process.Start(info);
         }
     }
 }
