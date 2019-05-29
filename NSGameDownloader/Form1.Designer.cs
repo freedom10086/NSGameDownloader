@@ -35,7 +35,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menu_update_game = new System.Windows.Forms.ToolStripMenuItem();
-            this.检查游戏更新ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.updateCnExcel = new System.Windows.Forms.ToolStripMenuItem();
             this.帮助ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.查看帮助ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -58,7 +58,6 @@
             this.check_box_download = new System.Windows.Forms.CheckBox();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listView1 = new System.Windows.Forms.ListView();
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -114,7 +113,6 @@
             this.帮助ToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Padding = new System.Windows.Forms.Padding(8, 2, 0, 2);
             this.menuStrip1.Size = new System.Drawing.Size(832, 28);
             this.menuStrip1.TabIndex = 100;
             this.menuStrip1.Text = "menuStrip1";
@@ -123,7 +121,7 @@
             // 
             this.文件ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.menu_update_game,
-            this.检查游戏更新ToolStripMenuItem});
+            this.updateCnExcel});
             this.文件ToolStripMenuItem.Name = "文件ToolStripMenuItem";
             this.文件ToolStripMenuItem.Size = new System.Drawing.Size(53, 24);
             this.文件ToolStripMenuItem.Text = "文件";
@@ -131,16 +129,16 @@
             // menu_update_game
             // 
             this.menu_update_game.Name = "menu_update_game";
-            this.menu_update_game.Size = new System.Drawing.Size(182, 26);
+            this.menu_update_game.Size = new System.Drawing.Size(224, 26);
             this.menu_update_game.Text = "更新数据库";
             this.menu_update_game.Click += new System.EventHandler(this.menu_update_game_Click);
             // 
-            // 检查游戏更新ToolStripMenuItem
+            // updateCnExcel
             // 
-            this.检查游戏更新ToolStripMenuItem.Name = "检查游戏更新ToolStripMenuItem";
-            this.检查游戏更新ToolStripMenuItem.Size = new System.Drawing.Size(182, 26);
-            this.检查游戏更新ToolStripMenuItem.Text = "检查游戏更新";
-            this.检查游戏更新ToolStripMenuItem.Click += new System.EventHandler(this.检查游戏更新ToolStripMenuItem_Click);
+            this.updateCnExcel.Name = "updateCnExcel";
+            this.updateCnExcel.Size = new System.Drawing.Size(224, 26);
+            this.updateCnExcel.Text = "同步中文数据库";
+            this.updateCnExcel.Click += new System.EventHandler(this.UpdateCnExcel_Click);
             // 
             // 帮助ToolStripMenuItem
             // 
@@ -355,20 +353,15 @@
             // 
             // columnHeader2
             // 
+            this.columnHeader2.Tag = "";
             this.columnHeader2.Text = "NAME";
-            this.columnHeader2.Width = 281;
-            // 
-            // columnHeader6
-            // 
-            this.columnHeader6.Text = "UPD/DLC";
-            this.columnHeader6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeader6.Width = 81;
+            this.columnHeader2.Width = 312;
             // 
             // columnHeader7
             // 
             this.columnHeader7.Text = "中文";
             this.columnHeader7.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.columnHeader7.Width = 49;
+            this.columnHeader7.Width = 53;
             // 
             // listView1
             // 
@@ -377,13 +370,13 @@
             this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
-            this.columnHeader6,
             this.columnHeader7,
             this.columnHeader8,
             this.columnHeader5});
             this.listView1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.listView1.FullRowSelect = true;
             this.listView1.GridLines = true;
+            this.listView1.HideSelection = false;
             this.listView1.LabelEdit = true;
             this.listView1.Location = new System.Drawing.Point(13, 69);
             this.listView1.Margin = new System.Windows.Forms.Padding(4);
@@ -399,12 +392,12 @@
             // columnHeader8
             // 
             this.columnHeader8.Text = "发行商";
-            this.columnHeader8.Width = 110;
+            this.columnHeader8.Width = 132;
             // 
             // columnHeader5
             // 
             this.columnHeader5.Text = "发行日期";
-            this.columnHeader5.Width = 96;
+            this.columnHeader5.Width = 120;
             // 
             // btnDownload
             // 
@@ -513,14 +506,13 @@
         private System.Windows.Forms.CheckBox check_box_download;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
-        private System.Windows.Forms.ColumnHeader columnHeader6;
         private System.Windows.Forms.ColumnHeader columnHeader7;
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.ToolStripStatusLabel label_progress;
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.Button btnDownload;
         private System.Windows.Forms.ColumnHeader columnHeader8;
-        private System.Windows.Forms.ToolStripMenuItem 检查游戏更新ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem updateCnExcel;
         private System.Windows.Forms.ListBox localFileListbox;
     }
 }
