@@ -291,7 +291,10 @@ namespace NSGameDownloader
 
                 if (isBase)
                 {
-                    var res = db.Execute("REPLACE INTO GameInfo " +
+                    var game = _gameLists.Find(x => x.tid == tidStr);
+                    if (game == null)
+                    {
+                        var res = db.Execute("REPLACE INTO GameInfo " +
                         "(tid, " + region.ToLower() + "name, version, releaseDate, category, publisher, iconUrl, bannerUrl, intro, description, languages, size, haveCn) " +
                         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                         tidStr, kvp.Value["name"].ToString(), kvp.Value["version"].ToString(),
@@ -299,6 +302,20 @@ namespace NSGameDownloader
                         kvp.Value["iconUrl"].ToString(), kvp.Value["bannerUrl"].ToString(), kvp.Value["intro"].ToString(),
                         kvp.Value["description"].ToString(), String.Join(",", languages), kvp.Value["size"].ToObject<long>(),
                         languages.Contains("zh"));
+                    }
+                    else
+                    {
+                        var res = db.Execute("UPDATE GameInfo " +
+                        "SET " + region.ToLower() + "name = ?, version = ?, releaseDate = ?, category = ?, publisher = ?, " +
+                        "iconUrl = ?, bannerUrl = ?, intro = ?, description = ?, languages = ?, size = ?, haveCn = ? " +
+                        "WHERE tid = ?",
+                        kvp.Value["name"].ToString(), kvp.Value["version"].ToString(),
+                        kvp.Value["releaseDate"].ToString(), String.Join(",", category), kvp.Value["publisher"].ToString(),
+                        kvp.Value["iconUrl"].ToString(), kvp.Value["bannerUrl"].ToString(), kvp.Value["intro"].ToString(),
+                        kvp.Value["description"].ToString(), String.Join(",", languages), kvp.Value["size"].ToObject<long>(),
+                        languages.Contains("zh"), tidStr);
+                    }
+                    
                 }
                 else
                 {
