@@ -13,15 +13,15 @@ namespace NSGameDownloader
         {
             Form prompt = new Form()
             {
-                Width = 360,
-                Height = 150,
+                Width = 500,
+                Height = 200,
                 FormBorderStyle = FormBorderStyle.FixedDialog,
                 Text = caption,
                 StartPosition = FormStartPosition.CenterScreen
             };
-            TextBox textBox = new TextBox() { Left = 10, Top = 12, Width = 320 };
+            TextBox textBox = new TextBox() { Left = 10, Top = 12, Width = 450 };
             textBox.Text = initValue;
-            Button confirmation = new Button() { Text = "Ok", Left = 250, Width = 80, Top = 45, DialogResult = DialogResult.OK };
+            Button confirmation = new Button() { Text = "Ok", Left = 360, Width = 100, Height = 45, Top = 60, DialogResult = DialogResult.OK };
             confirmation.Click += (sender, e) => { prompt.Close(); };
             prompt.Controls.Add(textBox);
             prompt.Controls.Add(confirmation);

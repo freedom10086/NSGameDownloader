@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 namespace NSGameDownloader
 {
-    partial class AboutBox1 : Form
+    partial class AboutWindow : Form
     {
-        public AboutBox1()
+        public AboutWindow()
         {
             InitializeComponent();
             this.Text = String.Format("关于 {0}", AssemblyTitle);
