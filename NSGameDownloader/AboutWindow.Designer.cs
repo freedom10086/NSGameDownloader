@@ -153,7 +153,7 @@
             this.okButton.Text = "确定";
             this.okButton.Click += new System.EventHandler(this.okButton_Click);
             // 
-            // AboutBox1
+            // AboutWindow
             // 
             this.AcceptButton = this.okButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 24F);
@@ -164,7 +164,7 @@
             this.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "AboutBox1";
+            this.Name = "AboutWindow";
             this.Padding = new System.Windows.Forms.Padding(18, 16, 18, 16);
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

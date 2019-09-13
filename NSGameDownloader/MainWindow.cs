@@ -43,7 +43,7 @@ namespace NSGameDownloader
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void FormLoad(object sender, EventArgs e)
         {
             if (File.Exists(ConfigPath))
             {
@@ -57,7 +57,7 @@ namespace NSGameDownloader
 
             if (_config["localGameDir"].ToString().Length > 0 && Directory.Exists(_config["localGameDir"].ToString()))
             {
-                check_box_download.Visible = true;
+                downloadCheckBox.Visible = true;
             }
 
 
@@ -65,12 +65,17 @@ namespace NSGameDownloader
 
             if (!Directory.Exists("image")) Directory.CreateDirectory("image");
             //使用winapi 做占位符
-            SendMessage(textBox_keyword.Handle, 0x1501, 0, "在这里输入 id,中文名,英文名 关键字...");
+            SendMessage(searchTextBox.Handle, 0x1501, 0, "在这里输入 id,中文名,英文名 关键字...");
 
             var tl = new Thread(ThreadLoad);
             tl.Start();
             var t2 = new Thread(InitDbThread);
             t2.Start();
+        }
+
+        private void FormWindowClosing(object sender, FormClosingEventArgs e)
+        {
+            db.Close();
         }
 
         /// <summary>
@@ -129,32 +134,6 @@ namespace NSGameDownloader
             }
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            db.Close();
-        }
-
-        private string GetBaseTid(string id)
-        {
-            if (id.EndsWith("000"))
-            {
-                return id;
-            }
-            else if (id.EndsWith("800"))
-            {
-                return id.Substring(0, id.Length - 3) + "000";
-            }
-            else
-            {
-                long val = long.Parse(id.Substring(0, id.Length - 3), System.Globalization.NumberStyles.HexNumber);
-                val = val - 1;
-
-                //Console.WriteLine("dlc:" + id + " base:" + val.ToString("X") + "000");
-
-                return val.ToString("X") + "000";
-            }
-        }
-
         public void UpdateTitleKey()
         {
             Invoke(new Action(() =>
@@ -162,11 +141,11 @@ namespace NSGameDownloader
                 toolStripProgressBar_download.Visible = true;
                 toolStripProgressBar_download.Maximum = 4;
                 toolStripProgressBar_download.Value = 1;
-                button_search.Text = "下载中";
-                button_search.Enabled = false;
-                checkbox_cn.Enabled = false;
-                check_box_download.Enabled = false;
-                textBox_keyword.Enabled = false;
+                searchButton.Text = "下载中";
+                searchButton.Enabled = false;
+                chCheckBox.Enabled = false;
+                downloadCheckBox.Enabled = false;
+                searchTextBox.Enabled = false;
                 label_progress.Visible = true;
             }));
 
@@ -227,15 +206,475 @@ namespace NSGameDownloader
 
             Invoke(new Action(() =>
             {
-                button_search.Text = "搜索";
-                button_search.Enabled = true;
-                checkbox_cn.Enabled = true;
-                check_box_download.Enabled = true;
-                textBox_keyword.Enabled = true;
+                searchButton.Text = "搜索";
+                searchButton.Enabled = true;
+                chCheckBox.Enabled = true;
+                downloadCheckBox.Enabled = true;
+                searchTextBox.Enabled = true;
                 toolStripProgressBar_download.Visible = false;
                 label_progress.Visible = false;
                 SearchGameName();
             }));
+        }
+
+        private void SearchButtonClick(object sender, EventArgs e)
+        {
+            //var keys = Titlekeys.Root.Where(x => x.Contains(textBox_keyword.Text.Trim()));
+            Console.WriteLine("start serach:" + searchTextBox.Text);
+            SearchGameName(searchTextBox.Text);
+        }
+
+        private void SearchGameName(string keywords = "")
+        {
+            Invoke(new Action(() =>
+            {
+                gameList.Items.Clear();
+                gameList.BeginUpdate();
+
+                if (_showDownloaded) // 搜索本地已下载
+                {
+                    foreach (var tid in _localGames)
+                    {
+                        var game = _gameLists.Find(x => x.tid == tid);
+                        //全文件查找
+                        string allstr = tid;
+                        if (game != null)
+                        {
+                            allstr = allstr + (game.cnName != null ? "#" + game.cnName : "")
+                            + (game.hkName != null ? "#" + game.hkName : "")
+                            + (game.usName != null ? "#" + game.usName : "")
+                            + (game.jpName != null ? "#" + game.jpName : "");
+                        }
+
+                        if (_onlyShowCn && (game != null && !game.haveCn))
+                        {
+                            continue;
+                        }
+
+                        if (allstr.ToLower().Contains(keywords.Trim().ToLower()))
+                        {
+                            if (game == null)
+                            {
+                                gameList.Items.Add(new ListViewItem(new[]
+                                {
+                                    tid,tid,"","","",""
+                                }));
+                            }
+                            else
+                            {
+                                gameList.Items.Add(new ListViewItem(new[]
+                                {
+                                    game.tid,
+                                    GetGameName(game),
+                                    game.haveCn ? "●" : "",
+                                    game.publisher != null ? game.publisher : "",
+                                    game.releaseDate != null ? game.releaseDate : "",
+                                    game.star ? "●" : "",
+                                }));
+                            }
+                        }
+                    }
+                }
+                else // 搜索全部游戏
+                {
+                    foreach (var game in _gameLists)
+                    {
+                        //全文件查找
+                        var allstr = game.tid + (game.cnName != null ? "#" + game.cnName : "")
+                            + (game.hkName != null ? "#" + game.hkName : "")
+                            + (game.usName != null ? "#" + game.usName : "")
+                            + (game.jpName != null ? "#" + game.jpName : "");
+
+                        if (_onlyShowCn && !game.haveCn)
+                        {
+                            continue;
+                        }
+
+                        if (allstr.ToLower().Contains(keywords.Trim().ToLower()))
+                        {
+                            gameList.Items.Add(new ListViewItem(new[]
+                            {
+                                game.tid,
+                                GetGameName(game),
+                                game.haveCn ? "●" : "",
+                                game.publisher != null ? game.publisher : "",
+                                game.releaseDate != null ? game.releaseDate : "",
+                                game.star ? "●" : "",
+                            }));
+                        }
+
+                    }
+
+                    // 补全主动搜索
+                    // 01006C900CC60000
+                    if (gameList.Items.Count == 0 && keywords.Length == 16 && (keywords.EndsWith("000") || keywords.EndsWith("800")))
+                    {
+                        // change update to base
+                        String newKeyword = keywords.Substring(0, 13) + "000";
+                        gameList.Items.Add(new ListViewItem(new[]
+                        {
+                            newKeyword,
+                            keywords, //防止没有中文名
+                            "", "", "", ""
+                        }));
+                    }
+                }
+
+
+                gameList.EndUpdate();
+                gameCountLabel.Text = "总数：" + gameList.Items.Count;
+
+                if (gameList.Items.Count > 0)
+                {
+                    gameList.SelectedItems.Clear();
+                    gameList.Items[0].Selected = true;//设定选中
+                    gameList.Items[0].Focused = true;
+                    gameList.Select();
+                }
+            }));
+        }
+
+        private void GameListSelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (gameList.SelectedItems.Count == 0)
+            {
+                return;
+            }
+
+            _curTid = gameList.SelectedItems[0].Text;
+            if (_config["localGameDir"].ToString().Length > 0)
+            {
+                localDirLabel.Visible = true;
+                var dir = _config["localGameDir"].ToString() + "\\" + _curTid.Substring(0, 5) + "\\" + _curTid + "\\";
+                if (Directory.Exists(dir))
+                {
+                    localDirLabel.Text = dir;
+                    localGameListbox.Visible = false;
+
+                    InitLocalListbox(dir);
+                }
+                else
+                {
+                    localDirLabel.Text = "创建目录";
+                    localGameListbox.Visible = false;
+                }
+            }
+
+            var game = _gameLists.Find(x => x.tid == _curTid);
+            if (game == null)
+            {
+                gameNameLabel.Text = _curTid;
+                GamePublisherLabel.Text = "发行商：--";
+                gameSizeLabel.Text = $"大小：--";
+                gameLansLabel.Text = $"支持语言：--";
+                gameTypeLabel.Text = "类型：--";
+                gameImageBox.Image = Resources.error;
+            }
+            else
+            {
+                gameNameLabel.Text = GetGameName(game);
+                GamePublisherLabel.Text = "发行商：" + game.publisher;
+                gameSizeLabel.Text = $"大小：{ConvertBytes(game.size)}";
+                gameLansLabel.Text = $"支持语言：{game.languages}";
+                gameTypeLabel.Text = "类型：" + game.category;
+
+                if (game.iconUrl != null && game.iconUrl.Length > 0)
+                {
+                    GetGameImage(_curTid, game.iconUrl, game.bannerUrl);
+                }
+                else
+                {
+                    gameImageBox.Image = Resources.error;
+                }
+            }
+        }
+
+        private void GameListMouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                if (gameList.FocusedItem.Bounds.Contains(e.Location))
+                {
+                    var tid = gameList.FocusedItem.Text;
+                    var game = _gameLists.Find(x => x.tid == tid);
+                    if (game == null) return;
+
+                    MenuItem starMenuItem = new MenuItem(game.star ? "取消收藏" : "收藏");
+                    starMenuItem.Click += delegate (object sender2, EventArgs e2) {
+                        Console.WriteLine("star " + gameList.FocusedItem.Text);
+                        var res = db.Execute("UPDATE GameInfo SET star = ? WHERE tid = ?", game.star ? false : true, tid);
+                        if (res > 0)
+                        {
+                            game.star = !game.star;
+                            gameList.FocusedItem.SubItems[5].Text = game.star ? "●" : "";
+                            Console.WriteLine("result " + game.star);
+                        }
+                    };
+
+                    MenuItem editMenuItem = new MenuItem("编辑");
+                    editMenuItem.Click += delegate (object sender2, EventArgs e2) {
+                        GameListMouseDoubleClick(sender, e);
+                    };
+
+                    MenuItem[] mi = new MenuItem[] { starMenuItem, editMenuItem };
+                    ContextMenu contextMenu = new ContextMenu(mi);
+                    contextMenu.Show(gameList, new Point(e.X, e.Y));
+                }
+            }
+        }
+
+        private void GameListMouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            ListView listview = (ListView)sender;
+            ListViewItem lstrow = listview.GetItemAt(e.X, e.Y);
+            ListViewItem.ListViewSubItem lstcol = lstrow.GetSubItemAt(e.X, e.Y);
+
+            var tid = gameList.SelectedItems[0].Text;
+            Console.WriteLine("tid: " + tid);
+
+            string strText = lstcol.Text;
+            try
+            {
+                Clipboard.SetDataObject(strText);
+                string info = string.Format("内容【{0}】已经复制到剪贴板", strText);
+                Console.WriteLine(info);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+            var game = _gameLists.Find(x => x.tid == tid);
+            string promptValue = PromptDialog.ShowDialog("修改中文名", strText).Trim();
+            if (promptValue.Length > 0)
+            {
+                var res = db.Execute("UPDATE GameInfo SET cnName = ? WHERE tid = ?", promptValue, tid);
+                if (res > 0)
+                {
+                    Console.WriteLine("update name to " + promptValue);
+                    lstcol.Text = promptValue;
+                    if (game != null)
+                    {
+                        game.cnName = promptValue;
+                    }
+
+                }
+            }
+        }
+
+        private void GameListColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            Console.WriteLine("ColumnClick:" + e.Column);
+            // 检查点击的列是不是现在的排序列.
+            if (e.Column == listSorter.sortedColumn)
+            {
+                // 重新设置此列的排序方法.
+                if (listSorter.sortOrder == SortOrder.Ascending)
+                {
+                    listSorter.sortOrder = SortOrder.Descending;
+                }
+                else
+                {
+                    listSorter.sortOrder = SortOrder.Ascending;
+                }
+            }
+            else
+            {
+                // 设置排序列，默认为正向排序
+                listSorter.sortedColumn = e.Column;
+                listSorter.sortOrder = SortOrder.Ascending;
+            }
+
+            gameList.ListViewItemSorter = listSorter;
+            // 用新的排序方法对ListView排序
+            gameList.Sort();
+        }
+
+        private void InitLocalListbox(string d)
+        {
+            DirectoryInfo dir = new DirectoryInfo(d);
+            if (!dir.Exists) { return; }
+            FileInfo[] files = dir.GetFiles();
+            localGameListbox.Items.Clear();
+
+            foreach (FileInfo f in files)
+            {
+                if (f.Name.EndsWith(".nsp") || f.Name.EndsWith(".xci"))
+                {
+                    localGameListbox.Items.Add(f);
+                }
+            }
+
+            if (localGameListbox.Items.Count > 0)
+            {
+                localGameListbox.Visible = true;
+            }
+        }
+
+        private void GetGameImage(String tid, String url, String bannerUrl)
+        {
+            var filename = "image\\" + tid + ".jpg";
+            if (File.Exists(filename))
+            {
+                try
+                {
+                    gameImageBox.Image = Image.FromFile(filename);
+                }
+                catch
+                {
+                    File.Delete(filename);
+                }
+            }
+
+            if (!File.Exists(filename))
+            {
+                var web = new WebClient { Encoding = Encoding.UTF8 };
+                // 解决WebClient不能通过https下载内容问题
+                ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+                try
+                {
+                    web.DownloadFileCompleted += IconDownloadFileCompleted;
+                    web.DownloadFileAsync(new Uri(url), filename, tid);
+                    //web.DownloadFile(url, filename);
+                    Invoke(new Action(() =>
+                    {
+                        gameImageBox.Image = Resources.load;
+                    }));
+                }
+                catch
+                {
+                    Invoke(new Action(() =>
+                    {
+                        if (tid == _curTid)
+                            gameImageBox.Image = Resources.error;
+                    }));
+                }
+            }
+        }
+
+        void IconDownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            if (e.UserState != null)
+            {
+                string tid = e.UserState.ToString();
+                if (tid == _curTid)
+                {
+                    var filename = "image\\" + tid + ".jpg";
+                    gameImageBox.Image = Image.FromFile(filename);
+                }
+            }
+        }
+
+        // 根据文件id计算出游戏TID
+        private string GetBaseTid(string id)
+        {
+            if (id.EndsWith("000"))
+            {
+                return id;
+            }
+            else if (id.EndsWith("800"))
+            {
+                return id.Substring(0, id.Length - 3) + "000";
+            }
+            else
+            {
+                long val = long.Parse(id.Substring(0, id.Length - 3), System.Globalization.NumberStyles.HexNumber);
+                val = val - 1;
+
+                //Console.WriteLine("dlc:" + id + " base:" + val.ToString("X") + "000");
+
+                return val.ToString("X") + "000";
+            }
+        }
+
+        // 对文件大小进行转换
+        public static string ConvertBytes(long len)
+        {
+            if (len > 1073741824)
+                return (len / 1073741824.0).ToString("F") + "GB";
+            if (len > 1048576)
+                return (len / 1048576.0).ToString("F") + "MB";
+            return (len / 1024.0).ToString("F") + "KB";
+        }
+
+        public static string GetGameName(GameInfo game)
+        {
+            return game.cnName != null ? game.cnName.Trim()
+                     : game.hkName != null ? game.hkName.Trim()
+                     : game.usName != null ? game.usName.Trim()
+                     : game.jpName != null ? game.jpName.Trim() : game.tid;
+        }
+
+        private void GameNameInputChange(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar != (char)Keys.Enter) return;
+            e.Handled = true; //防止向上冒泡
+            SearchGameName(searchTextBox.Text);
+        }
+
+        private void HaveCnCheckedChanged(object sender, EventArgs e)
+        {
+            _onlyShowCn = ((CheckBox)sender).Checked;
+            searchTextBox.Text = "";
+            SearchGameName();
+        }
+
+        private void DownloadCheckedChanged(object sender, EventArgs e)
+        {
+            _showDownloaded = ((CheckBox)sender).Checked;
+            searchTextBox.Text = "";
+            SearchGameName();
+        }
+
+        private void LocalDirLabelClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (_curTid == null) return;
+            var dir = _config["localGameDir"].ToString() + "\\" + _curTid.Substring(0, 5) + "\\" + _curTid + "\\";
+            if (Directory.Exists(dir))
+            {
+                Process.Start("Explorer.exe", dir);
+            }
+            else
+            {
+                Directory.CreateDirectory(dir);
+                Process.Start("Explorer.exe", dir);
+                localDirLabel.Text = dir;
+            }
+        }
+
+        private void GameImageClick(object sender, EventArgs e)
+        {
+            if (_curTid == null) return;
+            var g = _gameLists.Find(x => x.tid == _curTid);
+            if (g == null) return;
+
+            // US AU
+            Process.Start($"https://ec.nintendo.com/apps/{_curTid}/US");
+        }
+
+        private void LocalGameListSelectedIndexChanged(object sender, EventArgs e)
+        {
+            FileInfo f = (FileInfo)localGameListbox.SelectedItem;
+            Console.WriteLine(f.FullName);
+            ProcessStartInfo info = new ProcessStartInfo("XCI-Explorer\\XCI-Explorer.exe", "\"" + f.FullName + "\"");
+            //info.WorkingDirectory = Path.GetDirectoryName("");
+            Process.Start(info);
+        }
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
+
+        private void UpdateGameDbClick(object sender, EventArgs e)
+        {
+            var t = new Thread(UpdateTitleKey);
+            t.Start();
+        }
+
+        private void UpdateCnExcelClick(object sender, EventArgs e)
+        {
+            var t = new Thread(UpdateExcel);
+            t.Start();
         }
 
         private bool UpdateNutTileDb(string region, string lang)
@@ -315,7 +754,7 @@ namespace NSGameDownloader
                         kvp.Value["description"].ToString(), String.Join(",", languages), kvp.Value["size"].ToObject<long>(),
                         languages.Contains("zh"), tidStr);
                     }
-                    
+
                 }
                 else
                 {
@@ -347,11 +786,11 @@ namespace NSGameDownloader
                 toolStripProgressBar_download.Visible = true;
                 toolStripProgressBar_download.Maximum = 2;
                 toolStripProgressBar_download.Value = 1;
-                button_search.Text = "加载中";
-                button_search.Enabled = false;
-                checkbox_cn.Enabled = false;
-                check_box_download.Enabled = false;
-                textBox_keyword.Enabled = false;
+                searchButton.Text = "加载中";
+                searchButton.Enabled = false;
+                chCheckBox.Enabled = false;
+                downloadCheckBox.Enabled = false;
+                searchTextBox.Enabled = false;
                 label_progress.Visible = true;
             }));
 
@@ -397,420 +836,15 @@ namespace NSGameDownloader
 
             Invoke(new Action(() =>
             {
-                button_search.Text = "搜索";
-                button_search.Enabled = true;
-                checkbox_cn.Enabled = true;
-                check_box_download.Enabled = true;
-                textBox_keyword.Enabled = true;
+                searchButton.Text = "搜索";
+                searchButton.Enabled = true;
+                chCheckBox.Enabled = true;
+                downloadCheckBox.Enabled = true;
+                searchTextBox.Enabled = true;
                 toolStripProgressBar_download.Visible = false;
                 label_progress.Visible = false;
-                SearchGameName(textBox_keyword.Text);
+                SearchGameName(searchTextBox.Text);
             }));
-        }
-
-        private void button_search_Click(object sender, EventArgs e)
-        {
-            //var keys = Titlekeys.Root.Where(x => x.Contains(textBox_keyword.Text.Trim()));
-            Console.WriteLine("start serach:" + textBox_keyword.Text);
-            SearchGameName(textBox_keyword.Text);
-        }
-
-        private void SearchGameName(string keywords = "")
-        {
-            Invoke(new Action(() =>
-            {
-                listView1.Items.Clear();
-                listView1.BeginUpdate();
-
-                if (_showDownloaded) // 搜索本地已下载
-                {
-                    foreach (var tid in _localGames)
-                    {
-                        var game = _gameLists.Find(x => x.tid == tid);
-                        //全文件查找
-                        string allstr = tid;
-                        if (game != null)
-                        {
-                            allstr = allstr + (game.cnName != null ? "#" + game.cnName : "")
-                            + (game.hkName != null ? "#" + game.hkName : "")
-                            + (game.usName != null ? "#" + game.usName : "")
-                            + (game.jpName != null ? "#" + game.jpName : "");
-                        }
-
-                        if (_onlyShowCn && (game != null && !game.haveCn))
-                        {
-                            continue;
-                        }
-
-                        if (allstr.ToLower().Contains(keywords.Trim().ToLower()))
-                        {
-                            if (game == null)
-                            {
-                                listView1.Items.Add(new ListViewItem(new[]
-                                {
-                                    tid,tid,"","",""
-                                }));
-                            }
-                            else
-                            {
-                                listView1.Items.Add(new ListViewItem(new[]
-                                {
-                                    game.tid,
-                                    GetGameName(game),
-                                    game.haveCn ? "●" : "",
-                                    game.publisher != null ? game.publisher : "",
-                                    game.releaseDate != null ? game.releaseDate : ""
-                                }));
-                            }
-                        }
-                    }
-                }
-                else // 搜索全部游戏
-                {
-                    foreach (var game in _gameLists)
-                    {
-                        //全文件查找
-                        var allstr = game.tid + (game.cnName != null ? "#" + game.cnName : "")
-                            + (game.hkName != null ? "#" + game.hkName : "")
-                            + (game.usName != null ? "#" + game.usName : "")
-                            + (game.jpName != null ? "#" + game.jpName : "");
-
-                        if (_onlyShowCn && !game.haveCn)
-                        {
-                            continue;
-                        }
-
-                        if (allstr.ToLower().Contains(keywords.Trim().ToLower()))
-                        {
-                            listView1.Items.Add(new ListViewItem(new[]
-                            {
-                                game.tid,
-                                GetGameName(game),
-                                game.haveCn ? "●" : "",
-                                game.publisher != null ? game.publisher : "",
-                                game.releaseDate != null ? game.releaseDate : ""
-                            }));
-                        }
-
-                    }
-
-                    // 补全主动搜索
-                    // 01006C900CC60000
-                    if (listView1.Items.Count == 0 && keywords.Length == 16 && (keywords.EndsWith("000") || keywords.EndsWith("800")))
-                    {
-                        // change update to base
-                        String newKeyword = keywords.Substring(0, 13) + "000";
-                        listView1.Items.Add(new ListViewItem(new[]
-                        {
-                            newKeyword,
-                            keywords, //防止没有中文名
-                            "",
-                            "",
-                            ""
-                        }));
-                    }
-                }
-
-
-                listView1.EndUpdate();
-                label_count.Text = "总数：" + listView1.Items.Count;
-
-                if (listView1.Items.Count > 0)
-                {
-                    listView1.SelectedItems.Clear();
-                    listView1.Items[0].Selected = true;//设定选中
-                    listView1.Items[0].Focused = true;
-                    listView1.Select();
-                }
-            }));
-        }
-
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (listView1.SelectedItems.Count == 0)
-            {
-                return;
-            }
-
-            _curTid = listView1.SelectedItems[0].Text;
-            if (_config["localGameDir"].ToString().Length > 0)
-            {
-                localDirLabel.Visible = true;
-                var dir = _config["localGameDir"].ToString() + "\\" + _curTid.Substring(0, 5) + "\\" + _curTid + "\\";
-                if (Directory.Exists(dir))
-                {
-                    localDirLabel.Text = dir;
-                    localFileListbox.Visible = false;
-
-                    InitLocalListbox(dir);
-                }
-                else
-                {
-                    localDirLabel.Text = "创建目录";
-                    localFileListbox.Visible = false;
-                }
-            }
-
-            var game = _gameLists.Find(x => x.tid == _curTid);
-            if (game == null)
-            {
-                info_label_name.Text = _curTid;
-                info_label_publisher.Text = "发行商：--";
-                label_info_size.Text = $"大小：--";
-                label_info_support_lan.Text = $"支持语言：--";
-                label_info_type.Text = "类型：--";
-                pictureBox_gameicon.Image = Resources.error;
-            }
-            else
-            {
-                info_label_name.Text = GetGameName(game);
-                info_label_publisher.Text = "发行商：" + game.publisher;
-                label_info_size.Text = $"大小：{ConvertBytes(game.size)}";
-                label_info_support_lan.Text = $"支持语言：{game.languages}";
-                label_info_type.Text = "类型：" + game.category;
-
-                if (game.iconUrl != null && game.iconUrl.Length > 0)
-                {
-                    GetGameImage(_curTid, game.iconUrl, game.bannerUrl);
-                }
-                else
-                {
-                    pictureBox_gameicon.Image = Resources.error;
-                }
-            }
-        }
-
-        private void InitLocalListbox(string d)
-        {
-            DirectoryInfo dir = new DirectoryInfo(d);
-            if (!dir.Exists) { return; }
-            FileInfo[] files = dir.GetFiles();
-            localFileListbox.Items.Clear();
-
-            foreach (FileInfo f in files)
-            {
-                if (f.Name.EndsWith(".nsp") || f.Name.EndsWith(".xci"))
-                {
-                    localFileListbox.Items.Add(f);
-                }
-            }
-
-            if (localFileListbox.Items.Count > 0)
-            {
-                localFileListbox.Visible = true;
-            }
-        }
-
-        private void listView1_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            ListView listview = (ListView)sender;
-            ListViewItem lstrow = listview.GetItemAt(e.X, e.Y);
-            ListViewItem.ListViewSubItem lstcol = lstrow.GetSubItemAt(e.X, e.Y);
-
-            var tid = listView1.SelectedItems[0].Text;
-            Console.WriteLine("tid: " + tid);
-
-            string strText = lstcol.Text;
-            try
-            {
-                Clipboard.SetDataObject(strText);
-                string info = string.Format("内容【{0}】已经复制到剪贴板", strText);
-                Console.WriteLine(info);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-
-            var game = _gameLists.Find(x => x.tid == tid);
-            string promptValue = PromptDialog.ShowDialog("修改中文名", strText).Trim();
-            if (promptValue.Length > 0)
-            {
-                var res = db.Execute("UPDATE GameInfo SET cnName = ? WHERE tid = ?", promptValue, tid);
-                if (res > 0)
-                {
-                    Console.WriteLine("update name to " + promptValue);
-                    lstcol.Text = promptValue;
-                    if (game != null)
-                    {
-                        game.cnName = promptValue;
-                    }
-
-                }
-            }
-        }
-
-        private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
-        {
-            Console.WriteLine("ColumnClick:" + e.Column);
-            // 检查点击的列是不是现在的排序列.
-            if (e.Column == listSorter.sortedColumn)
-            {
-                // 重新设置此列的排序方法.
-                if (listSorter.sortOrder == SortOrder.Ascending)
-                {
-                    listSorter.sortOrder = SortOrder.Descending;
-                }
-                else
-                {
-                    listSorter.sortOrder = SortOrder.Ascending;
-                }
-            }
-            else
-            {
-                // 设置排序列，默认为正向排序
-                listSorter.sortedColumn = e.Column;
-                listSorter.sortOrder = SortOrder.Ascending;
-            }
-
-            listView1.ListViewItemSorter = listSorter;
-            // 用新的排序方法对ListView排序
-            listView1.Sort();
-        }
-
-        private void GetGameImage(String tid, String url, String bannerUrl)
-        {
-            var filename = "image\\" + tid + ".jpg";
-            if (File.Exists(filename))
-            {
-                try
-                {
-                    pictureBox_gameicon.Image = Image.FromFile(filename);
-                }
-                catch
-                {
-                    File.Delete(filename);
-                }
-            }
-
-            if (!File.Exists(filename))
-            {
-                var web = new WebClient { Encoding = Encoding.UTF8 };
-                // 解决WebClient不能通过https下载内容问题
-                ServicePointManager.ServerCertificateValidationCallback += delegate { return true; };
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-                try
-                {
-                    web.DownloadFileCompleted += Icon_DownloadFileCompleted;
-                    web.DownloadFileAsync(new Uri(url), filename, tid);
-                    //web.DownloadFile(url, filename);
-                    Invoke(new Action(() =>
-                    {
-                        pictureBox_gameicon.Image = Resources.load;
-                    }));
-                }
-                catch
-                {
-                    Invoke(new Action(() =>
-                    {
-                        if (tid == _curTid)
-                            pictureBox_gameicon.Image = Resources.error;
-                    }));
-                }
-            }
-        }
-
-        void Icon_DownloadFileCompleted(object sender, AsyncCompletedEventArgs e)
-        {
-            if (e.UserState != null)
-            {
-                string tid = e.UserState.ToString();
-                if (tid == _curTid)
-                {
-                    var filename = "image\\" + tid + ".jpg";
-                    pictureBox_gameicon.Image = Image.FromFile(filename);
-                }
-            }
-        }
-
-        // 对文件大小进行转换
-        public static string ConvertBytes(long len)
-        {
-            if (len > 1073741824)
-                return (len / 1073741824.0).ToString("F") + "GB";
-            if (len > 1048576)
-                return (len / 1048576.0).ToString("F") + "MB";
-            return (len / 1024.0).ToString("F") + "KB";
-        }
-
-        public static string GetGameName(GameInfo game)
-        {
-            return game.cnName != null ? game.cnName.Trim()
-                     : game.hkName != null ? game.hkName.Trim()
-                     : game.usName != null ? game.usName.Trim()
-                     : game.jpName != null ? game.jpName.Trim() : game.tid;
-        }
-
-        private void textBox_keyword_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar != (char)Keys.Enter) return;
-            e.Handled = true; //防止向上冒泡
-            SearchGameName(textBox_keyword.Text);
-        }
-
-
-        private void checkbox_cn_CheckedChanged(object sender, EventArgs e)
-        {
-            _onlyShowCn = ((CheckBox)sender).Checked;
-            textBox_keyword.Text = "";
-            SearchGameName();
-        }
-
-        private void check_box_download_CheckedChanged(object sender, EventArgs e)
-        {
-            _showDownloaded = ((CheckBox)sender).Checked;
-            textBox_keyword.Text = "";
-            SearchGameName();
-        }
-
-        private void localDirLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (_curTid == null) return;
-            var dir = _config["localGameDir"].ToString() + "\\" + _curTid.Substring(0, 5) + "\\" + _curTid + "\\";
-            if (Directory.Exists(dir))
-            {
-                Process.Start("Explorer.exe", dir);
-            }
-            else
-            {
-                Directory.CreateDirectory(dir);
-                Process.Start("Explorer.exe", dir);
-                localDirLabel.Text = dir;
-            }
-        }
-
-        private void pictureBox_gameicon_Click(object sender, EventArgs e)
-        {
-            if (_curTid == null) return;
-            var g = _gameLists.Find(x => x.tid == _curTid);
-            if (g == null) return;
-
-            // US AU
-            Process.Start($"https://ec.nintendo.com/apps/{_curTid}/US");
-        }
-
-        private void LocalFileListbox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            FileInfo f = (FileInfo)localFileListbox.SelectedItem;
-            Console.WriteLine(f.FullName);
-            ProcessStartInfo info = new ProcessStartInfo("XCI-Explorer\\XCI-Explorer.exe", "\"" + f.FullName + "\"");
-            //info.WorkingDirectory = Path.GetDirectoryName("");
-            Process.Start(info);
-        }
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern int SendMessage(IntPtr hWnd, int msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
-
-        private void UpdateGameDbClick(object sender, EventArgs e)
-        {
-            var t = new Thread(UpdateTitleKey);
-            t.Start();
-        }
-
-        private void UpdateCnExcelClick(object sender, EventArgs e)
-        {
-            var t = new Thread(UpdateExcel);
-            t.Start();
         }
 
         private void ViewHelpClick(object sender, EventArgs e)

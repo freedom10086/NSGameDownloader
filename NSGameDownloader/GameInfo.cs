@@ -26,5 +26,6 @@ namespace NSGameDownloader
         public string languages { get; set; }
         public long size { get; set; }
         public bool haveCn { get; set; }
+        public bool star { get; set; }
     }
 }

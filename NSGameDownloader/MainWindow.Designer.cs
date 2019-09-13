@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
-            this.textBox_keyword = new System.Windows.Forms.TextBox();
-            this.button_search = new System.Windows.Forms.Button();
+            this.searchTextBox = new System.Windows.Forms.TextBox();
+            this.searchButton = new System.Windows.Forms.Button();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.文件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menu_update_game = new System.Windows.Forms.ToolStripMenuItem();
@@ -44,49 +44,50 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripProgressBar_download = new System.Windows.Forms.ToolStripProgressBar();
             this.label_progress = new System.Windows.Forms.ToolStripStatusLabel();
-            this.label_count = new System.Windows.Forms.Label();
-            this.label_info_size = new System.Windows.Forms.Label();
-            this.label_info_support_lan = new System.Windows.Forms.Label();
+            this.gameCountLabel = new System.Windows.Forms.Label();
+            this.gameSizeLabel = new System.Windows.Forms.Label();
+            this.gameLansLabel = new System.Windows.Forms.Label();
             this.localDirLabel = new System.Windows.Forms.LinkLabel();
-            this.label_info_type = new System.Windows.Forms.Label();
-            this.checkbox_cn = new System.Windows.Forms.CheckBox();
-            this.info_label_name = new System.Windows.Forms.Label();
-            this.info_label_publisher = new System.Windows.Forms.Label();
-            this.check_box_download = new System.Windows.Forms.CheckBox();
+            this.gameTypeLabel = new System.Windows.Forms.Label();
+            this.chCheckBox = new System.Windows.Forms.CheckBox();
+            this.gameNameLabel = new System.Windows.Forms.Label();
+            this.GamePublisherLabel = new System.Windows.Forms.Label();
+            this.downloadCheckBox = new System.Windows.Forms.CheckBox();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.listView1 = new System.Windows.Forms.ListView();
+            this.gameList = new System.Windows.Forms.ListView();
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.pictureBox_gameicon = new System.Windows.Forms.PictureBox();
-            this.localFileListbox = new System.Windows.Forms.ListBox();
+            this.gameImageBox = new System.Windows.Forms.PictureBox();
+            this.localGameListbox = new System.Windows.Forms.ListBox();
+            this.收藏 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.menuStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_gameicon)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gameImageBox)).BeginInit();
             this.SuspendLayout();
             // 
-            // textBox_keyword
+            // searchTextBox
             // 
-            this.textBox_keyword.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.textBox_keyword.Location = new System.Drawing.Point(20, 56);
-            this.textBox_keyword.Margin = new System.Windows.Forms.Padding(6);
-            this.textBox_keyword.Name = "textBox_keyword";
-            this.textBox_keyword.Size = new System.Drawing.Size(488, 39);
-            this.textBox_keyword.TabIndex = 99;
-            this.textBox_keyword.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_keyword_KeyPress);
+            this.searchTextBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.searchTextBox.Location = new System.Drawing.Point(20, 56);
+            this.searchTextBox.Margin = new System.Windows.Forms.Padding(6);
+            this.searchTextBox.Name = "searchTextBox";
+            this.searchTextBox.Size = new System.Drawing.Size(500, 39);
+            this.searchTextBox.TabIndex = 99;
+            this.searchTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.GameNameInputChange);
             // 
-            // button_search
+            // searchButton
             // 
-            this.button_search.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button_search.Location = new System.Drawing.Point(746, 54);
-            this.button_search.Margin = new System.Windows.Forms.Padding(6);
-            this.button_search.Name = "button_search";
-            this.button_search.Size = new System.Drawing.Size(126, 45);
-            this.button_search.TabIndex = 1;
-            this.button_search.Text = "搜索";
-            this.button_search.UseVisualStyleBackColor = true;
-            this.button_search.Click += new System.EventHandler(this.button_search_Click);
+            this.searchButton.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.searchButton.Location = new System.Drawing.Point(532, 53);
+            this.searchButton.Margin = new System.Windows.Forms.Padding(6);
+            this.searchButton.Name = "searchButton";
+            this.searchButton.Size = new System.Drawing.Size(126, 44);
+            this.searchButton.TabIndex = 1;
+            this.searchButton.Text = "搜索";
+            this.searchButton.UseVisualStyleBackColor = true;
+            this.searchButton.Click += new System.EventHandler(this.SearchButtonClick);
             // 
             // menuStrip1
             // 
@@ -98,7 +99,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(9, 3, 0, 3);
-            this.menuStrip1.Size = new System.Drawing.Size(1174, 44);
+            this.menuStrip1.Size = new System.Drawing.Size(1174, 48);
             this.menuStrip1.TabIndex = 100;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -108,20 +109,20 @@
             this.menu_update_game,
             this.updateCnExcel});
             this.文件ToolStripMenuItem.Name = "文件ToolStripMenuItem";
-            this.文件ToolStripMenuItem.Size = new System.Drawing.Size(82, 38);
+            this.文件ToolStripMenuItem.Size = new System.Drawing.Size(82, 42);
             this.文件ToolStripMenuItem.Text = "文件";
             // 
             // menu_update_game
             // 
             this.menu_update_game.Name = "menu_update_game";
-            this.menu_update_game.Size = new System.Drawing.Size(359, 44);
+            this.menu_update_game.Size = new System.Drawing.Size(324, 44);
             this.menu_update_game.Text = "更新游戏数据库";
             this.menu_update_game.Click += new System.EventHandler(this.UpdateGameDbClick);
             // 
             // updateCnExcel
             // 
             this.updateCnExcel.Name = "updateCnExcel";
-            this.updateCnExcel.Size = new System.Drawing.Size(359, 44);
+            this.updateCnExcel.Size = new System.Drawing.Size(324, 44);
             this.updateCnExcel.Text = "从Excel导入数据";
             this.updateCnExcel.Click += new System.EventHandler(this.UpdateCnExcelClick);
             // 
@@ -134,37 +135,37 @@
             this.toolStripMenuItem1,
             this.关于ToolStripMenuItem});
             this.帮助ToolStripMenuItem.Name = "帮助ToolStripMenuItem";
-            this.帮助ToolStripMenuItem.Size = new System.Drawing.Size(82, 38);
+            this.帮助ToolStripMenuItem.Size = new System.Drawing.Size(82, 42);
             this.帮助ToolStripMenuItem.Text = "帮助";
             // 
             // 查看帮助ToolStripMenuItem
             // 
             this.查看帮助ToolStripMenuItem.Name = "查看帮助ToolStripMenuItem";
-            this.查看帮助ToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
+            this.查看帮助ToolStripMenuItem.Size = new System.Drawing.Size(243, 44);
             this.查看帮助ToolStripMenuItem.Text = "查看帮助";
             this.查看帮助ToolStripMenuItem.Click += new System.EventHandler(this.ViewHelpClick);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(356, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(240, 6);
             // 
             // 发送反馈ToolStripMenuItem
             // 
             this.发送反馈ToolStripMenuItem.Name = "发送反馈ToolStripMenuItem";
-            this.发送反馈ToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
+            this.发送反馈ToolStripMenuItem.Size = new System.Drawing.Size(243, 44);
             this.发送反馈ToolStripMenuItem.Text = "发送反馈";
             this.发送反馈ToolStripMenuItem.Click += new System.EventHandler(this.SendFeedBackClick);
             // 
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(356, 6);
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(240, 6);
             // 
             // 关于ToolStripMenuItem
             // 
             this.关于ToolStripMenuItem.Name = "关于ToolStripMenuItem";
-            this.关于ToolStripMenuItem.Size = new System.Drawing.Size(359, 44);
+            this.关于ToolStripMenuItem.Size = new System.Drawing.Size(243, 44);
             this.关于ToolStripMenuItem.Text = "关于";
             this.关于ToolStripMenuItem.Click += new System.EventHandler(this.AboutProgramClick);
             // 
@@ -197,43 +198,43 @@
             this.label_progress.Text = "正在下载xxx";
             this.label_progress.Visible = false;
             // 
-            // label_count
+            // gameCountLabel
             // 
-            this.label_count.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_count.BackColor = System.Drawing.Color.Transparent;
-            this.label_count.Font = new System.Drawing.Font("微软雅黑", 7.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label_count.ForeColor = System.Drawing.Color.DimGray;
-            this.label_count.Location = new System.Drawing.Point(974, 1094);
-            this.label_count.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
-            this.label_count.Name = "label_count";
-            this.label_count.Size = new System.Drawing.Size(176, 22);
-            this.label_count.TabIndex = 103;
-            this.label_count.Text = "总数: 计算中";
-            this.label_count.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.gameCountLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.gameCountLabel.BackColor = System.Drawing.Color.Transparent;
+            this.gameCountLabel.Font = new System.Drawing.Font("微软雅黑", 7.125F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.gameCountLabel.ForeColor = System.Drawing.Color.DimGray;
+            this.gameCountLabel.Location = new System.Drawing.Point(974, 1094);
+            this.gameCountLabel.Margin = new System.Windows.Forms.Padding(6, 0, 6, 0);
+            this.gameCountLabel.Name = "gameCountLabel";
+            this.gameCountLabel.Size = new System.Drawing.Size(176, 22);
+            this.gameCountLabel.TabIndex = 103;
+            this.gameCountLabel.Text = "总数: 计算中";
+            this.gameCountLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // label_info_size
+            // gameSizeLabel
             // 
-            this.label_info_size.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label_info_size.AutoSize = true;
-            this.label_info_size.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label_info_size.Location = new System.Drawing.Point(285, 874);
-            this.label_info_size.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label_info_size.Name = "label_info_size";
-            this.label_info_size.Size = new System.Drawing.Size(86, 31);
-            this.label_info_size.TabIndex = 106;
-            this.label_info_size.Text = "大小：";
+            this.gameSizeLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.gameSizeLabel.AutoSize = true;
+            this.gameSizeLabel.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.gameSizeLabel.Location = new System.Drawing.Point(285, 874);
+            this.gameSizeLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.gameSizeLabel.Name = "gameSizeLabel";
+            this.gameSizeLabel.Size = new System.Drawing.Size(86, 31);
+            this.gameSizeLabel.TabIndex = 106;
+            this.gameSizeLabel.Text = "大小：";
             // 
-            // label_info_support_lan
+            // gameLansLabel
             // 
-            this.label_info_support_lan.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            this.gameLansLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label_info_support_lan.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label_info_support_lan.Location = new System.Drawing.Point(285, 998);
-            this.label_info_support_lan.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label_info_support_lan.Name = "label_info_support_lan";
-            this.label_info_support_lan.Size = new System.Drawing.Size(888, 66);
-            this.label_info_support_lan.TabIndex = 108;
-            this.label_info_support_lan.Text = "支持语言：";
+            this.gameLansLabel.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.gameLansLabel.Location = new System.Drawing.Point(285, 998);
+            this.gameLansLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.gameLansLabel.Name = "gameLansLabel";
+            this.gameLansLabel.Size = new System.Drawing.Size(888, 66);
+            this.gameLansLabel.TabIndex = 108;
+            this.gameLansLabel.Text = "支持语言：";
             // 
             // localDirLabel
             // 
@@ -250,70 +251,72 @@
             this.localDirLabel.TabStop = true;
             this.localDirLabel.Text = "本地目录";
             this.localDirLabel.Visible = false;
-            this.localDirLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.localDirLabel_LinkClicked);
+            this.localDirLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LocalDirLabelClicked);
             // 
-            // label_info_type
+            // gameTypeLabel
             // 
-            this.label_info_type.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.label_info_type.AutoSize = true;
-            this.label_info_type.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label_info_type.Location = new System.Drawing.Point(285, 918);
-            this.label_info_type.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label_info_type.Name = "label_info_type";
-            this.label_info_type.Size = new System.Drawing.Size(86, 31);
-            this.label_info_type.TabIndex = 111;
-            this.label_info_type.Text = "类型：";
+            this.gameTypeLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.gameTypeLabel.AutoSize = true;
+            this.gameTypeLabel.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.gameTypeLabel.Location = new System.Drawing.Point(285, 918);
+            this.gameTypeLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.gameTypeLabel.Name = "gameTypeLabel";
+            this.gameTypeLabel.Size = new System.Drawing.Size(86, 31);
+            this.gameTypeLabel.TabIndex = 111;
+            this.gameTypeLabel.Text = "类型：";
             // 
-            // checkbox_cn
+            // chCheckBox
             // 
-            this.checkbox_cn.AutoSize = true;
-            this.checkbox_cn.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.checkbox_cn.Location = new System.Drawing.Point(520, 61);
-            this.checkbox_cn.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.checkbox_cn.Name = "checkbox_cn";
-            this.checkbox_cn.Size = new System.Drawing.Size(94, 35);
-            this.checkbox_cn.TabIndex = 112;
-            this.checkbox_cn.Text = "中文";
-            this.checkbox_cn.UseVisualStyleBackColor = true;
-            this.checkbox_cn.CheckedChanged += new System.EventHandler(this.checkbox_cn_CheckedChanged);
+            this.chCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chCheckBox.AutoSize = true;
+            this.chCheckBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.chCheckBox.Location = new System.Drawing.Point(1059, 58);
+            this.chCheckBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.chCheckBox.Name = "chCheckBox";
+            this.chCheckBox.Size = new System.Drawing.Size(94, 35);
+            this.chCheckBox.TabIndex = 112;
+            this.chCheckBox.Text = "中文";
+            this.chCheckBox.UseVisualStyleBackColor = true;
+            this.chCheckBox.CheckedChanged += new System.EventHandler(this.HaveCnCheckedChanged);
             // 
-            // info_label_name
+            // gameNameLabel
             // 
-            this.info_label_name.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.info_label_name.AutoSize = true;
-            this.info_label_name.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
-            this.info_label_name.Location = new System.Drawing.Point(285, 838);
-            this.info_label_name.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.info_label_name.Name = "info_label_name";
-            this.info_label_name.Size = new System.Drawing.Size(110, 31);
-            this.info_label_name.TabIndex = 113;
-            this.info_label_name.Text = "游戏名：";
+            this.gameNameLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.gameNameLabel.AutoSize = true;
+            this.gameNameLabel.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold);
+            this.gameNameLabel.Location = new System.Drawing.Point(285, 838);
+            this.gameNameLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.gameNameLabel.Name = "gameNameLabel";
+            this.gameNameLabel.Size = new System.Drawing.Size(110, 31);
+            this.gameNameLabel.TabIndex = 113;
+            this.gameNameLabel.Text = "游戏名：";
             // 
-            // info_label_publisher
+            // GamePublisherLabel
             // 
-            this.info_label_publisher.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.info_label_publisher.AutoSize = true;
-            this.info_label_publisher.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.info_label_publisher.Location = new System.Drawing.Point(285, 958);
-            this.info_label_publisher.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.info_label_publisher.Name = "info_label_publisher";
-            this.info_label_publisher.Size = new System.Drawing.Size(110, 31);
-            this.info_label_publisher.TabIndex = 114;
-            this.info_label_publisher.Text = "发行商：";
+            this.GamePublisherLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.GamePublisherLabel.AutoSize = true;
+            this.GamePublisherLabel.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.GamePublisherLabel.Location = new System.Drawing.Point(285, 958);
+            this.GamePublisherLabel.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.GamePublisherLabel.Name = "GamePublisherLabel";
+            this.GamePublisherLabel.Size = new System.Drawing.Size(110, 31);
+            this.GamePublisherLabel.TabIndex = 114;
+            this.GamePublisherLabel.Text = "发行商：";
             // 
-            // check_box_download
+            // downloadCheckBox
             // 
-            this.check_box_download.AutoSize = true;
-            this.check_box_download.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.check_box_download.Location = new System.Drawing.Point(621, 61);
-            this.check_box_download.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.check_box_download.Name = "check_box_download";
-            this.check_box_download.Size = new System.Drawing.Size(118, 35);
-            this.check_box_download.TabIndex = 115;
-            this.check_box_download.Text = "已下载";
-            this.check_box_download.UseVisualStyleBackColor = true;
-            this.check_box_download.Visible = false;
-            this.check_box_download.CheckedChanged += new System.EventHandler(this.check_box_download_CheckedChanged);
+            this.downloadCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.downloadCheckBox.AutoSize = true;
+            this.downloadCheckBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.downloadCheckBox.Location = new System.Drawing.Point(933, 58);
+            this.downloadCheckBox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.downloadCheckBox.Name = "downloadCheckBox";
+            this.downloadCheckBox.Size = new System.Drawing.Size(118, 35);
+            this.downloadCheckBox.TabIndex = 115;
+            this.downloadCheckBox.Text = "已下载";
+            this.downloadCheckBox.UseVisualStyleBackColor = true;
+            this.downloadCheckBox.Visible = false;
+            this.downloadCheckBox.CheckedChanged += new System.EventHandler(this.DownloadCheckedChanged);
             // 
             // columnHeader1
             // 
@@ -332,32 +335,34 @@
             this.columnHeader7.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.columnHeader7.Width = 70;
             // 
-            // listView1
+            // gameList
             // 
-            this.listView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.gameList.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.gameList.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader1,
             this.columnHeader2,
             this.columnHeader7,
             this.columnHeader8,
-            this.columnHeader5});
-            this.listView1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.listView1.FullRowSelect = true;
-            this.listView1.GridLines = true;
-            this.listView1.HideSelection = false;
-            this.listView1.LabelEdit = true;
-            this.listView1.Location = new System.Drawing.Point(20, 110);
-            this.listView1.Margin = new System.Windows.Forms.Padding(6);
-            this.listView1.Name = "listView1";
-            this.listView1.Size = new System.Drawing.Size(1133, 672);
-            this.listView1.TabIndex = 0;
-            this.listView1.UseCompatibleStateImageBehavior = false;
-            this.listView1.View = System.Windows.Forms.View.Details;
-            this.listView1.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView1_ColumnClick);
-            this.listView1.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
-            this.listView1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.listView1_MouseDoubleClick);
+            this.columnHeader5,
+            this.收藏});
+            this.gameList.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.gameList.FullRowSelect = true;
+            this.gameList.GridLines = true;
+            this.gameList.HideSelection = false;
+            this.gameList.LabelEdit = true;
+            this.gameList.Location = new System.Drawing.Point(20, 110);
+            this.gameList.Margin = new System.Windows.Forms.Padding(6);
+            this.gameList.Name = "gameList";
+            this.gameList.Size = new System.Drawing.Size(1133, 672);
+            this.gameList.TabIndex = 0;
+            this.gameList.UseCompatibleStateImageBehavior = false;
+            this.gameList.View = System.Windows.Forms.View.Details;
+            this.gameList.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.GameListColumnClick);
+            this.gameList.SelectedIndexChanged += new System.EventHandler(this.GameListSelectedIndexChanged);
+            this.gameList.MouseClick += new System.Windows.Forms.MouseEventHandler(this.GameListMouseClick);
+            this.gameList.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.GameListMouseDoubleClick);
             // 
             // columnHeader8
             // 
@@ -369,68 +374,74 @@
             this.columnHeader5.Text = "发行日期";
             this.columnHeader5.Width = 140;
             // 
-            // pictureBox_gameicon
+            // gameImageBox
             // 
-            this.pictureBox_gameicon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.pictureBox_gameicon.BackColor = System.Drawing.SystemColors.ActiveBorder;
-            this.pictureBox_gameicon.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pictureBox_gameicon.ImageLocation = "";
-            this.pictureBox_gameicon.Location = new System.Drawing.Point(15, 836);
-            this.pictureBox_gameicon.Margin = new System.Windows.Forms.Padding(6);
-            this.pictureBox_gameicon.Name = "pictureBox_gameicon";
-            this.pictureBox_gameicon.Size = new System.Drawing.Size(250, 250);
-            this.pictureBox_gameicon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pictureBox_gameicon.TabIndex = 7;
-            this.pictureBox_gameicon.TabStop = false;
-            this.pictureBox_gameicon.Click += new System.EventHandler(this.pictureBox_gameicon_Click);
+            this.gameImageBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.gameImageBox.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.gameImageBox.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.gameImageBox.ImageLocation = "";
+            this.gameImageBox.Location = new System.Drawing.Point(15, 836);
+            this.gameImageBox.Margin = new System.Windows.Forms.Padding(6);
+            this.gameImageBox.Name = "gameImageBox";
+            this.gameImageBox.Size = new System.Drawing.Size(250, 250);
+            this.gameImageBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.gameImageBox.TabIndex = 7;
+            this.gameImageBox.TabStop = false;
+            this.gameImageBox.Click += new System.EventHandler(this.GameImageClick);
             // 
-            // localFileListbox
+            // localGameListbox
             // 
-            this.localFileListbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.localFileListbox.FormattingEnabled = true;
-            this.localFileListbox.ItemHeight = 24;
-            this.localFileListbox.Location = new System.Drawing.Point(741, 793);
-            this.localFileListbox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.localFileListbox.Name = "localFileListbox";
-            this.localFileListbox.Size = new System.Drawing.Size(409, 148);
-            this.localFileListbox.TabIndex = 117;
-            this.localFileListbox.Visible = false;
-            this.localFileListbox.SelectedIndexChanged += new System.EventHandler(this.LocalFileListbox_SelectedIndexChanged);
+            this.localGameListbox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.localGameListbox.FormattingEnabled = true;
+            this.localGameListbox.ItemHeight = 24;
+            this.localGameListbox.Location = new System.Drawing.Point(741, 793);
+            this.localGameListbox.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.localGameListbox.Name = "localGameListbox";
+            this.localGameListbox.Size = new System.Drawing.Size(409, 148);
+            this.localGameListbox.TabIndex = 117;
+            this.localGameListbox.Visible = false;
+            this.localGameListbox.SelectedIndexChanged += new System.EventHandler(this.LocalGameListSelectedIndexChanged);
             // 
-            // Form1
+            // 收藏
+            // 
+            this.收藏.Text = "收藏";
+            this.收藏.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.收藏.Width = 70;
+            // 
+            // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 24F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1174, 1122);
-            this.Controls.Add(this.localFileListbox);
-            this.Controls.Add(this.check_box_download);
-            this.Controls.Add(this.info_label_publisher);
-            this.Controls.Add(this.info_label_name);
-            this.Controls.Add(this.checkbox_cn);
-            this.Controls.Add(this.label_info_type);
+            this.Controls.Add(this.localGameListbox);
+            this.Controls.Add(this.downloadCheckBox);
+            this.Controls.Add(this.GamePublisherLabel);
+            this.Controls.Add(this.gameNameLabel);
+            this.Controls.Add(this.chCheckBox);
+            this.Controls.Add(this.gameTypeLabel);
             this.Controls.Add(this.localDirLabel);
-            this.Controls.Add(this.label_info_support_lan);
-            this.Controls.Add(this.label_info_size);
-            this.Controls.Add(this.label_count);
+            this.Controls.Add(this.gameLansLabel);
+            this.Controls.Add(this.gameSizeLabel);
+            this.Controls.Add(this.gameCountLabel);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.menuStrip1);
-            this.Controls.Add(this.pictureBox_gameicon);
-            this.Controls.Add(this.listView1);
-            this.Controls.Add(this.button_search);
-            this.Controls.Add(this.textBox_keyword);
+            this.Controls.Add(this.gameImageBox);
+            this.Controls.Add(this.gameList);
+            this.Controls.Add(this.searchButton);
+            this.Controls.Add(this.searchTextBox);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Margin = new System.Windows.Forms.Padding(6);
             this.MinimumSize = new System.Drawing.Size(1100, 800);
-            this.Name = "Form1";
+            this.Name = "MainWindow";
             this.Text = "NSGameManager";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormWindowClosing);
+            this.Load += new System.EventHandler(this.FormLoad);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_gameicon)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gameImageBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -438,9 +449,9 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox textBox_keyword;
-        private System.Windows.Forms.Button button_search;
-        private System.Windows.Forms.PictureBox pictureBox_gameicon;
+        private System.Windows.Forms.TextBox searchTextBox;
+        private System.Windows.Forms.Button searchButton;
+        private System.Windows.Forms.PictureBox gameImageBox;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem 文件ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem menu_update_game;
@@ -452,24 +463,25 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem 关于ToolStripMenuItem;
-        private System.Windows.Forms.Label label_count;
-        private System.Windows.Forms.Label label_info_size;
-        private System.Windows.Forms.Label label_info_support_lan;
+        private System.Windows.Forms.Label gameCountLabel;
+        private System.Windows.Forms.Label gameSizeLabel;
+        private System.Windows.Forms.Label gameLansLabel;
         private System.Windows.Forms.LinkLabel localDirLabel;
-        private System.Windows.Forms.Label label_info_type;
-        private System.Windows.Forms.CheckBox checkbox_cn;
-        private System.Windows.Forms.Label info_label_name;
-        private System.Windows.Forms.Label info_label_publisher;
-        private System.Windows.Forms.CheckBox check_box_download;
+        private System.Windows.Forms.Label gameTypeLabel;
+        private System.Windows.Forms.CheckBox chCheckBox;
+        private System.Windows.Forms.Label gameNameLabel;
+        private System.Windows.Forms.Label GamePublisherLabel;
+        private System.Windows.Forms.CheckBox downloadCheckBox;
         private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ColumnHeader columnHeader7;
-        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.ListView gameList;
         private System.Windows.Forms.ToolStripStatusLabel label_progress;
         private System.Windows.Forms.ColumnHeader columnHeader5;
         private System.Windows.Forms.ColumnHeader columnHeader8;
         private System.Windows.Forms.ToolStripMenuItem updateCnExcel;
-        private System.Windows.Forms.ListBox localFileListbox;
+        private System.Windows.Forms.ListBox localGameListbox;
+        private System.Windows.Forms.ColumnHeader 收藏;
     }
 }
 
